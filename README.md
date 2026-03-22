@@ -3,6 +3,10 @@
 # CaptureCap
 ***Capture Android Screen and/or Audio.***
 
+[<img src="https://f-droid.org/badge/get-it-on.png"
+    alt="Get it on F-Droid"
+    height="80">](https://f-droid.org/packages/com.yepgoryo.CaptureCap)
+
 <img src="metadata/en-US/images/phoneScreenshots/1.jpg" alt="CaptureCap Screenshot 1" width="300"/> <img src="metadata/en-US/images/phoneScreenshots/2.jpg" alt="CaptureCap Screenshot 2" width="300"/>
 
 *Audio Playback recording requires Android 10 or later. No Root needed*
