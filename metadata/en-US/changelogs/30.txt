@@ -1,0 +1,1 @@
+ * Quick fix for quick tile crashing on Android versions below 14.
