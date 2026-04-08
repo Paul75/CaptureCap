@@ -1,5 +1,6 @@
 package com.yepgoryo.CaptureCap
 
+import android.annotation.SuppressLint
 import android.app.PendingIntent
 import android.content.ComponentName
 import android.content.Context
@@ -67,6 +68,7 @@ class QuickTile : TileService() {
         }
     }
 
+    @SuppressLint("StartActivityAndCollapseDeprecated")
     @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
     @Throws(IllegalStateException::class, Resources.NotFoundException::class, IOException::class)
     override fun onClick() {
@@ -82,8 +84,18 @@ class QuickTile : TileService() {
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         intent.addFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK)
         intent.setAction(MainActivity.ACTION_ACTIVITY_START_RECORDING)
-        val pendingIntent = PendingIntent.getActivity(this, 1, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
 
-        startActivityAndCollapse(pendingIntent)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            val pendingIntent = PendingIntent.getActivity(
+                this,
+                1,
+                intent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
+
+            startActivityAndCollapse(pendingIntent)
+        } else {
+            startActivityAndCollapse(intent)
+        }
     }
 }
