@@ -12,4 +12,21 @@
     <color name="panel_button_dark">#453d51</color>
     <color name="panel_chronometer">#ffffff</color>
     <color name="contributorspanel_dark">#2c5aa0</color>
+    <color name="primary">#2196F3</color>
+    <color name="primaryLight">#BBDEFB</color>
+    <color name="secondary">#757575</color>
+    <color name="video_crop_text_dark">#ffffff</color>
+    <color name="crop_text">#000080</color>
+    <color name="crop_text_dark">#ffffff</color>
+    <color name="crop_track_paint">#9E9E9E</color>
+    <color name="crop_track_paint_dark">#9E9E9E</color>
+    <color name="crop_selected_track_paint">#2196F3</color>
+    <color name="crop_thumb_paint">#FFFFFF</color>
+    <color name="crop_thumb_paint_dark">#FFFFFF</color>
+    <color name="crop_thumb_dragging_paint">#2196F3</color>
+    <color name="crop_thumb_border_paint">#2196F3</color>
+    <color name="crop_tick_paint">#9E9E9E</color>
+    <color name="crop_tick_paint_dark">#9E9E9E</color>
+    <color name="crop_cursor_paint">#FF3333</color>
+    <color name="crop_cursor_paint_dark">#FF3333</color>
 </resources>

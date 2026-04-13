@@ -8,6 +8,7 @@
     <string name="record_open">Open recording</string>
     <string name="record_share">Share recording</string>
     <string name="record_delete">Delete recording</string>
+    <string name="record_crop">Crop recording</string>
     <string name="settings_title">Settings</string>
     <string name="option_activated">Activated</string>
     <string name="option_deactivated">Deactivated</string>
@@ -136,4 +137,15 @@
     <string name="setting_record_type_audio">Audio only</string>
     <string name="setting_audio_record_microphone_sound">Record microphone</string>
     <string name="setting_audio_record_playback_sound">Record audio</string>
+    <string name="crop_title">Crop Recording</string>
+    <string name="crop_loading">Loading</string>
+    <string name="crop_zoom_in">Zoom In</string>
+    <string name="crop_zoom_out">Zoom Out</string>
+    <string name="crop_play">Play</string>
+    <string name="crop_pause">Pause</string>
+    <string name="crop_stop">Stop</string>
+    <string name="crop_selection">Scroll To Selection</string>
+    <string name="crop_do_save">Crop and Save</string>
+    <string name="crop_progress">Cropping In Progress</string>
+    <string name="crop_done">Cropped File Saved</string>
 </resources>

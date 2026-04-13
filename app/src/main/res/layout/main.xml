@@ -155,6 +155,15 @@
                         android:background="?attr/selectableItemBackgroundBorderless"
                         android:layout_centerHorizontal="true" />
     
+                    <ImageButton
+                        android:id="@+id/video_crop_button"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="12dp"
+                        android:contentDescription="@string/record_open"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:layout_centerHorizontal="true" />
+
                 </LinearLayout>
     
                 <LinearLayout
@@ -173,7 +182,7 @@
                         android:contentDescription="@string/info_title"
                         android:background="?attr/selectableItemBackgroundBorderless"
                         android:layout_centerHorizontal="true" />
-    
+
                     <ImageButton
                         android:id="@+id/opensettings"
                         android:layout_width="wrap_content"
@@ -182,9 +191,9 @@
                         android:contentDescription="@string/settings_title"
                         android:background="?attr/selectableItemBackgroundBorderless"
                         android:layout_centerHorizontal="true" />
-    
+
                 </LinearLayout>
-    
+
             </LinearLayout>
     
         </RelativeLayout>

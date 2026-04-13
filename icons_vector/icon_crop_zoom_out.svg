@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="512"
+   height="512"
+   viewBox="0 0 135.46666 135.46667"
+   version="1.1"
+   id="svg5"
+   sodipodi:docname="icon_crop_zoom_out.svg"
+   inkscape:version="1.4.2 (f4327f4, 2025-05-13)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:dc="http://purl.org/dc/elements/1.1/">
+  <title
+     id="title1">CaptureCap notification record icon</title>
+  <sodipodi:namedview
+     id="namedview7"
+     pagecolor="#000000"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:document-units="px"
+     showgrid="false"
+     units="px"
+     width="512px"
+     inkscape:zoom="0.65778825"
+     inkscape:cx="108.69759"
+     inkscape:cy="195.35162"
+     inkscape:window-width="1920"
+     inkscape:window-height="1001"
+     inkscape:window-x="-9"
+     inkscape:window-y="-9"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="g6"
+     inkscape:lockguides="false"
+     showguides="true"
+     inkscape:showpageshadow="2"
+     inkscape:deskcolor="#d1d1d1">
+    <inkscape:grid
+       type="xygrid"
+       id="grid2352"
+       originx="0"
+       originy="0"
+       spacingy="1"
+       spacingx="1"
+       units="px"
+       visible="false" />
+  </sodipodi:namedview>
+  <defs
+     id="defs2" />
+  <metadata
+     id="metadata1">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:title>CaptureCap notification record icon</dc:title>
+        <dc:creator>
+          <cc:Agent>
+            <dc:title>Egor Olegovich Yakovlev</dc:title>
+          </cc:Agent>
+        </dc:creator>
+        <cc:license
+           rdf:resource="http://creativecommons.org/publicdomain/zero/1.0/" />
+      </cc:Work>
+      <cc:License
+         rdf:about="http://creativecommons.org/publicdomain/zero/1.0/">
+        <cc:permits
+           rdf:resource="http://creativecommons.org/ns#Reproduction" />
+        <cc:permits
+           rdf:resource="http://creativecommons.org/ns#Distribution" />
+        <cc:permits
+           rdf:resource="http://creativecommons.org/ns#DerivativeWorks" />
+      </cc:License>
+    </rdf:RDF>
+  </metadata>
+  <g
+     id="g6"
+     transform="translate(2.4371542,-6.5326981)">
+    <path
+       id="path3"
+       style="baseline-shift:baseline;display:inline;overflow:visible;vector-effect:none;fill:#ffffff;stroke-linecap:square;enable-background:accumulate;stop-color:#000000;stop-opacity:1;opacity:1"
+       d="M 50.077986 17.665869 C 30.876354 17.665869 15.253755 33.290535 15.253755 52.492166 C 15.253755 71.693799 30.876354 87.316397 50.077986 87.316397 C 54.120743 87.316397 58.004799 86.624296 61.61785 85.351659 L 98.21975 130.86619 L 115.33912 117.09856 L 78.985265 71.892532 L 78.985265 71.892015 C 82.720573 66.344342 84.902216 59.668229 84.902216 52.492166 C 84.902216 33.290535 69.279618 17.665869 50.077986 17.665869 z M 50.077986 22.959085 C 66.419787 22.959085 79.611583 36.150365 79.611583 52.492166 C 79.611584 61.390852 75.699711 69.354572 69.497989 74.763158 C 68.905158 75.280172 68.291577 75.774273 67.658308 76.243171 L 67.656758 76.244204 C 62.749148 79.877516 56.669796 82.02318 50.077986 82.02318 C 33.736185 82.02318 20.544904 68.833968 20.544905 52.492166 C 20.544905 36.150365 33.736185 22.959085 50.077986 22.959085 z M 75.855224 76.443159 L 107.89926 116.28982 L 99.027452 123.42427 L 66.983414 83.577607 L 75.855224 76.443159 z " />
+    <path
+       id="path4"
+       style="baseline-shift:baseline;display:inline;overflow:visible;opacity:1;vector-effect:none;fill:#ffffff;stroke-linecap:square;enable-background:accumulate;stop-color:#000000;stop-opacity:1"
+       d="m 32.580153,49.040836 h -2.6448 v 5.29115 h 2.6448 29.765624 2.64635 v -5.29115 h -2.64635 z"
+       transform="translate(2.6145041,0.80446318)"
+       sodipodi:nodetypes="ccccccccc" />
+  </g>
+</svg>

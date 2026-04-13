@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:id="@+id/statusbar"
+        android:background="@color/statusbar_light"
+        android:layout_width="match_parent"
+        android:layout_height="1px"
+        android:gravity="center_horizontal"
+        android:layout_centerHorizontal="true" />
+
+     <ScrollView
+        android:id="@+id/mainscroll"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:paddingLeft="16dp"
+        android:paddingRight="16dp"
+        android:fillViewport="true"
+        android:gravity="center">
+ 
+        <LinearLayout
+            android:id="@+id/crop_screen"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <androidx.media3.ui.PlayerView
+                android:id="@+id/player_view"
+                android:layout_width="300dp"
+                android:layout_weight="1"
+                android:layout_height="250dp"
+                android:layout_centerVertical="true"
+                android:layout_centerHorizontal="true"
+                android:layout_marginTop="48dp"
+                android:layout_marginBottom="48dp"
+                app:use_controller="false"
+                app:default_artwork="@drawable/icon_crop_audio_artwork"
+                app:use_artwork="true" />
+            
+            <LinearLayout
+                android:id="@+id/controls"
+                android:layout_width="400dp"
+                android:layout_weight="2"
+                android:layout_height="wrap_content"
+                android:paddingLeft="18dp"
+                android:paddingRight="18dp"
+                android:orientation="vertical"
+                android:layout_centerVertical="true"
+                android:layout_centerHorizontal="true"
+                android:gravity="center_horizontal">
+ 
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center">
+            
+                    <ImageButton
+                        android:id="@+id/btnPlay"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="7dp"
+                        android:contentDescription="@string/crop_play"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:layout_centerHorizontal="true" />
+        
+                    <ImageButton
+                        android:id="@+id/btnPause"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="7dp"
+                        android:contentDescription="@string/crop_pause"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:layout_centerHorizontal="true" />
+        
+                    <ImageButton
+                        android:id="@+id/btnStop"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="7dp"
+                        android:contentDescription="@string/crop_stop"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:layout_centerHorizontal="true" />
+        
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/tvStatus"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/crop_loading"
+                    android:textAlignment="center"
+                    android:textStyle="bold"
+                    android:textColor="@android:color/primary_text_light"
+                    android:textSize="14sp" />
+            
+                <com.yepgoryo.CaptureCap.RecordingCropBar
+                    android:id="@+id/zoomableSeekbar"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="16dp" />
+            
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:orientation="horizontal"
+                    android:gravity="center">
+            
+                    <ImageButton
+                        android:id="@+id/zoomInBtn"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="7dp"
+                        android:contentDescription="@string/crop_zoom_in"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:layout_centerHorizontal="true" />
+        
+                    <ImageButton
+                        android:id="@+id/zoomScrollSelection"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="7dp"
+                        android:contentDescription="@string/crop_selection"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:layout_centerHorizontal="true" />
+            
+                    <ImageButton
+                        android:id="@+id/zoomOutBtn"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="7dp"
+                        android:contentDescription="@string/crop_zoom_out"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:layout_centerHorizontal="true" />
+        
+                </LinearLayout>
+        
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="32dp"
+                    android:orientation="horizontal"
+                    android:gravity="center">
+        
+                    <Button
+                        android:id="@+id/cropVideo"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:paddingTop="10dp"
+                        android:paddingBottom="10dp"
+                        android:paddingLeft="20dp"
+                        android:paddingRight="20dp"
+                        android:text="@string/crop_do_save"
+                        android:contentDescription="@string/crop_do_save"
+                        android:background="@drawable/button_background"
+                        android:textColor="@color/button_color_light"
+                        android:textSize="12sp"
+                        android:layout_centerHorizontal="true" />
+
+                </LinearLayout>
+            </LinearLayout>
+        </LinearLayout>
+    </ScrollView>
+
+</LinearLayout>

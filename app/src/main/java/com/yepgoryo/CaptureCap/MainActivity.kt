@@ -5,7 +5,6 @@ import android.animation.ObjectAnimator
 import android.animation.ValueAnimator
 import android.app.AlertDialog
 import android.content.ComponentName
-import android.content.DialogInterface
 import android.content.Intent
 import android.content.ServiceConnection
 import android.content.pm.PackageManager
@@ -20,11 +19,9 @@ import android.os.Bundle
 import android.os.IBinder
 import android.os.SystemClock
 import android.util.DisplayMetrics
-import android.util.Log
 import android.view.Display
 import android.view.Surface
 import android.view.View
-import android.view.Window
 import android.widget.Chronometer
 import android.widget.ImageButton
 import android.widget.LinearLayout
@@ -61,6 +58,10 @@ class MainActivity : AppCompatActivity() {
     var recordAudioSetting: ImageButton? = null
     var recordDelete: ImageButton? = null
     private var recordDeleteIcon: VectorDrawableCompat? = null
+
+    var recordCrop: ImageButton? = null
+
+    private var recordCropIcon: VectorDrawableCompat? = null
     var recordInfo: ImageButton? = null
     private var recordInfoIcon: VectorDrawableCompat? = null
     var recordMicrophoneSetting: ImageButton? = null
@@ -422,6 +423,7 @@ class MainActivity : AppCompatActivity() {
             this.recordSettingsIcon = VectorDrawableCompat.create(getResources(), R.drawable.icon_record_settings_dark, null)
             this.recordShareIcon = VectorDrawableCompat.create(getResources(), R.drawable.icon_record_share_dark, null)
             this.recordDeleteIcon = VectorDrawableCompat.create(getResources(), R.drawable.icon_record_delete_dark, null)
+            this.recordCropIcon = VectorDrawableCompat.create(getResources(), R.drawable.icon_record_crop_dark, null)
             this.recordOpenIcon = VectorDrawableCompat.create(getResources(), R.drawable.icon_record_play_dark, null)
             this.recordStopIcon = VectorDrawableCompat.create(getResources(), R.drawable.icon_record_stop_dark, null)
         } else {
@@ -436,6 +438,7 @@ class MainActivity : AppCompatActivity() {
             this.recordShareIcon = VectorDrawableCompat.create(getResources(), R.drawable.icon_record_share, null)
             this.recordDeleteIcon = VectorDrawableCompat.create(getResources(), R.drawable.icon_record_delete, null)
             this.recordOpenIcon = VectorDrawableCompat.create(getResources(), R.drawable.icon_record_play, null)
+            this.recordCropIcon = VectorDrawableCompat.create(getResources(), R.drawable.icon_record_crop, null)
             this.recordStopIcon = VectorDrawableCompat.create(getResources(), R.drawable.icon_record_stop, null)
         }
         this.mainRecordingButton = RecordButton(baseContext, findViewById<ImageButton>(R.id.recordingmainbutton)!!)
@@ -472,6 +475,7 @@ class MainActivity : AppCompatActivity() {
         this.recordShare = findViewById<ImageButton>(R.id.sharerecord)!!
         this.recordDelete = findViewById<ImageButton>(R.id.deleterecord)!!
         this.recordOpen = findViewById<ImageButton>(R.id.openrecord)!!
+        this.recordCrop = findViewById<ImageButton>(R.id.video_crop_button)!!
         this.recordStop = findViewById<ImageButton>(R.id.recordstop)!!
         this.recordScreenSetting!!.setImageDrawable(this.recordScreenStateDisabled)
         this.recordMicrophoneSetting!!.setImageDrawable(this.recordMicrophoneStateDisabled)
@@ -481,6 +485,7 @@ class MainActivity : AppCompatActivity() {
         this.recordShare!!.setImageDrawable(this.recordShareIcon)
         this.recordDelete!!.setImageDrawable(this.recordDeleteIcon)
         this.recordOpen!!.setImageDrawable(this.recordOpenIcon)
+        this.recordCrop!!.setImageDrawable(this.recordCropIcon)
         this.recordStop!!.setImageDrawable(this.recordStopIcon)
         this.recordScreenSetting!!.setContentDescription(getResources().getString(R.string.setting_record_screen) + ": " + getResources().getString(R.string.option_deactivated))
         this.recordMicrophoneSetting!!.setContentDescription(getResources().getString(R.string.setting_audio_record_microphone_sound) + ": " + getResources().getString(R.string.option_deactivated))
@@ -494,6 +499,7 @@ class MainActivity : AppCompatActivity() {
         this.recordShare!!.let { TooltipCompat.setTooltipText(it, getResources().getString(R.string.record_share)) }
         this.recordDelete!!.let { TooltipCompat.setTooltipText(it, getResources().getString(R.string.record_delete)) }
         this.recordOpen!!.let { TooltipCompat.setTooltipText(it, getResources().getString(R.string.record_open)) }
+        this.recordCrop!!.let { TooltipCompat.setTooltipText(it, getResources().getString(R.string.record_crop)) }
         this.recordStop!!.let { TooltipCompat.setTooltipText(it, getResources().getString(R.string.record_stop)) }
 
         this.timerPanel = findViewById<LinearLayout>(R.id.recordtimerpanel)!!
@@ -506,6 +512,7 @@ class MainActivity : AppCompatActivity() {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
             this.audioPlaybackUnavailable!!.visibility = View.VISIBLE
             this.recordAudioSetting!!.setVisibility(View.GONE)
+            this.recordCrop!!.setVisibility(View.GONE)
         }
         if (!this.recordOnlyAudio) {
             this.recordScreenSetting!!.setImageDrawable(this.recordScreenState)
@@ -521,6 +528,14 @@ class MainActivity : AppCompatActivity() {
         }
         setRecordMode(this.appSettings!!.getBooleanProperty(GlobalProperties.PropertiesBoolean.RECORD_MODE, false))
         this.activityProjectionManager = getSystemService("media_projection") as MediaProjectionManager
+
+
+        this.recordCrop!!.setOnClickListener(object: View.OnClickListener {
+            override fun onClick(v: View?) {
+                this@MainActivity.startActivity(Intent(this@MainActivity, RecordingCropScreen::class.java))
+            }
+        })
+
 
         this.recordScreenSetting!!.setOnClickListener {
             this@MainActivity.mainRecordingButton!!.releaseFocus()

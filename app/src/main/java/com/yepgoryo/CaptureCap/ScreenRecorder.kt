@@ -99,6 +99,7 @@ class ScreenRecorder : Service() {
     var runningService: Boolean = false
     private var recordingBinder: IBinder = RecordingBinder()
     private var recordingTileBinder: IBinder = RecordingTileBinder()
+    private var cropperBinder: IBinder = VideoCropperBinder()
     private var shakeAcceleration: Float = 10.0f
     private var currentShakeAcceleration: Float = 9.80665f
     private var lastShakeAcceleration: Float = 9.80665f
@@ -266,6 +267,12 @@ class ScreenRecorder : Service() {
         }
     }
 
+    inner class VideoCropperBinder : Binder() {
+        fun getFilePath(): Uri {
+            return this@ScreenRecorder.finishedFileDocument!!
+        }
+    }
+
     override fun onDestroy() {
         super.onDestroy()
         this.sensor?.unregisterListener(this.sensorListener)
@@ -274,6 +281,9 @@ class ScreenRecorder : Service() {
     override fun onBind(intent: Intent): IBinder {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && intent.action == QuickTile.ACTION_CONNECT_TILE) {
             return this.recordingTileBinder
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && intent.action == RecordingCropScreen.ACTION_CONNECT_CROP) {
+            return this.cropperBinder
         }
         return this.recordingBinder
     }

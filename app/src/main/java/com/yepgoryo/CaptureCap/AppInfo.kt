@@ -44,7 +44,7 @@ class AppInfo : AppCompatActivity() {
             findViewById<LinearLayout>(R.id.repoboard).setBackgroundResource(R.drawable.contributorspanel_shape_dark)
             findViewById<TextView>(R.id.repogithublink).setLinkTextColor(getColor(R.color.link_color_dark))
             findViewById<LinearLayout>(R.id.statusbar).setBackgroundColor(getColor(R.color.statusbar_dark))
-            findViewById<Button>(R.id.showlicense).setBackground(getDrawable(R.drawable.button_show_license_background_dark))
+            findViewById<Button>(R.id.showlicense).setBackground(getDrawable(R.drawable.button_background_dark))
             findViewById<Button>(R.id.showlicense).setTextColor(getColor(R.color.button_color_dark_background))
         } else {
             AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
