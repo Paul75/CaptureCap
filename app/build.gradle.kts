@@ -14,8 +14,8 @@ android {
         applicationId = "com.yepgoryo.CaptureCap"
         minSdk = 23
         targetSdk = 36
-        versionCode = 30
-        versionName = "3.8.1"
+        versionCode = 31
+        versionName = "3.8.5"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
