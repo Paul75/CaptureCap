@@ -29,6 +29,7 @@ import android.widget.RelativeLayout
 import android.widget.TextView
 import android.widget.Toast
 import android.provider.Settings
+import android.util.Log
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
@@ -94,7 +95,6 @@ class MainActivity : AppCompatActivity() {
     private var recordMicrophone: Boolean = false
     private var recordPlayback: Boolean = false
     private var recordOnlyAudio: Boolean = false
-    private var stateToRestore: Boolean = false
 
     private var mConnection: ServiceConnection = object: ServiceConnection {
         override fun onServiceConnected(componentName: ComponentName, iBinder: IBinder) {
@@ -206,7 +206,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     inner class ActivityBinder : Binder() {
-        fun recordingStart() {
+        fun recordingStart(stateToRestore: Boolean) {
             this@MainActivity.timeCounter!!.stop()
             this@MainActivity.timeCounter!!.setBase(this@MainActivity.recordingBinder!!.getTimeStart())
             this@MainActivity.timeCounter!!.start()
@@ -214,7 +214,7 @@ class MainActivity : AppCompatActivity() {
             this@MainActivity.modesPanel!!.visibility = View.GONE
             this@MainActivity.optionsPanel!!.visibility = View.GONE
             this@MainActivity.recordingState = ActionState.RECORDING_IN_PROGRESS
-            if (this@MainActivity.stateToRestore) {
+            if (stateToRestore) {
                 this@MainActivity.showCounter(true, RecordButton.ButtonState.TRANSITION_TO_RECORDING)
             } else {
                 this@MainActivity.timeCounter!!.scaleX = 1.0f
@@ -224,7 +224,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        fun recordingStop() {
+        fun recordingStop(stateToRestore: Boolean) {
             this@MainActivity.timeCounter!!.stop()
             this@MainActivity.timeCounter!!.setBase(SystemClock.elapsedRealtime())
             this@MainActivity.audioPlaybackUnavailable!!.visibility = View.GONE
@@ -236,7 +236,7 @@ class MainActivity : AppCompatActivity() {
                 this@MainActivity.audioPlaybackUnavailable!!.visibility = View.VISIBLE
             }
             this@MainActivity.recordingState = ActionState.RECORDING_ENDED
-            if (this@MainActivity.stateToRestore) {
+            if (stateToRestore) {
                 this@MainActivity.showCounter(false, RecordButton.ButtonState.TRANSITION_TO_RECORDING_END)
             } else {
                 this@MainActivity.timerPanel!!.visibility = View.GONE
@@ -245,7 +245,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        fun recordingPause(j: Long) {
+        fun recordingPause(j: Long, stateToRestore: Boolean) {
             this@MainActivity.timeCounter!!.setBase(SystemClock.elapsedRealtime() - j)
             this@MainActivity.timeCounter!!.stop()
             this@MainActivity.modesPanel!!.visibility = View.GONE
@@ -255,7 +255,7 @@ class MainActivity : AppCompatActivity() {
             this@MainActivity.timerPanel!!.visibility = View.VISIBLE
             this@MainActivity.recordStop!!.setVisibility(View.VISIBLE)
             this@MainActivity.recordingState = ActionState.RECORDING_PAUSED
-            if (this@MainActivity.stateToRestore) {
+            if (stateToRestore) {
                 this@MainActivity.mainRecordingButton!!.transitionToButtonState(RecordButton.ButtonState.TRANSITION_TO_RECORDING_PAUSE)
             } else {
                 this@MainActivity.mainRecordingButton!!.transitionToButtonState(RecordButton.ButtonState.WHILE_PAUSE_NORMAL)
@@ -332,7 +332,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onCreate(bundle: Bundle?) {
-        super.onCreate(bundle)
         val display: Display = (baseContext.getSystemService("display") as DisplayManager).getDisplay(Display.DEFAULT_DISPLAY)
         this.display = display
         val rotation: Int = display.rotation
@@ -345,11 +344,11 @@ class MainActivity : AppCompatActivity() {
             this.appSettings!!.setDarkTheme(true, darkTheme)
         }
         if (((getResources().configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES && darkTheme == GlobalProperties.DarkThemeProperty.AUTOMATIC) || darkTheme == GlobalProperties.DarkThemeProperty.DARK) {
-            setTheme(androidx.appcompat.R.style.Theme_AppCompat_DayNight_NoActionBar)
-            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
+            setTheme(R.style.Theme_CaptureCap_Dark_NoActionBar)
         } else {
-            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
+            setTheme(R.style.Theme_CaptureCap_Light_NoActionBar)
         }
+        super.onCreate(bundle)
 
         setContentView(R.layout.main)
 
@@ -447,8 +446,7 @@ class MainActivity : AppCompatActivity() {
             override fun onClick(view: View) {
                 if (!this@MainActivity.mainRecordingButton!!.getLockButton()) {
                     this@MainActivity.mainRecordingButton!!.setLockButton(true)
-                    this@MainActivity.stateToRestore = true
-    
+
                     if (this@MainActivity.recordingState == ActionState.RECORDING_ENDED) {
                         this@MainActivity.recordingBinder!!.recordingReset()
                     } else if (this@MainActivity.recordingState == ActionState.RECORDING_PAUSED) {
@@ -672,7 +670,9 @@ class MainActivity : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
-        doBindService()
+        if (this.recordingBinder == null) {
+            doBindService()
+        }
         if (intent.action == ACTION_ACTIVITY_START_RECORDING && !this.stateActivated) {
             this.stateActivated = true
             recordingStart()

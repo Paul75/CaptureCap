@@ -108,8 +108,6 @@ class RecordingCropScreen : AppCompatActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
         if (savedInstanceState != null) {
             restoreSelection = savedInstanceState.getBoolean(KEY_RESTORE_SELECTION)
             currentStartMs = savedInstanceState.getLong(KEY_SELECTION_START)
@@ -131,11 +129,11 @@ class RecordingCropScreen : AppCompatActivity() {
         }
 
         if (((getResources().configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES && darkTheme == GlobalProperties.DarkThemeProperty.AUTOMATIC) || darkTheme == GlobalProperties.DarkThemeProperty.DARK) {
-            setTheme(androidx.appcompat.R.style.Theme_AppCompat_DayNight)
-            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
+            setTheme(R.style.Theme_CaptureCap_Dark)
         } else {
-            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
+            setTheme(R.style.Theme_CaptureCap_Light)
         }
+        super.onCreate(savedInstanceState)
 
         setContentView(R.layout.video_crop_screen)
 
@@ -177,7 +175,6 @@ class RecordingCropScreen : AppCompatActivity() {
 
             findViewById<Button>(R.id.cropVideo).setBackground(getDrawable(R.drawable.button_background_dark))
             findViewById<Button>(R.id.cropVideo).setTextColor(getColor(R.color.button_color_dark_background))
-            findViewById<TextView>(R.id.tvStatus).setTextColor(getColor(R.color.video_crop_text_dark))
         } else {
             zoomInIcon = VectorDrawableCompat.create(getResources(), R.drawable.icon_crop_zoom_in_color, null)!!
             zoomOutIcon = VectorDrawableCompat.create(getResources(), R.drawable.icon_crop_zoom_out_color, null)!!

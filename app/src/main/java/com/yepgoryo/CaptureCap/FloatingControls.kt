@@ -469,9 +469,9 @@ class FloatingControls : Service() {
         val darkTheme: GlobalProperties.DarkThemeProperty = this@FloatingControls.appSettings!!.getDarkTheme(true)
 
         if (((this.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES && darkTheme == GlobalProperties.DarkThemeProperty.AUTOMATIC) || darkTheme == GlobalProperties.DarkThemeProperty.DARK) {
-            this@FloatingControls.baseContext.setTheme(androidx.appcompat.R.style.Theme_AppCompat_DayNight)
+            this@FloatingControls.baseContext.setTheme(R.style.Theme_CaptureCap_Dark)
         } else {
-            this@FloatingControls.baseContext.setTheme(androidx.appcompat.R.style.Theme_AppCompat_Light)
+            this@FloatingControls.baseContext.setTheme(R.style.Theme_CaptureCap_Light)
         }
 
         if (this@FloatingControls.isHorizontal) {

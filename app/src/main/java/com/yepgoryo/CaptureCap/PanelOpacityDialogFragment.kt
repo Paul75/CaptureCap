@@ -42,6 +42,8 @@ class PanelOpacityDialogFragment : PreferenceDialogFragmentCompat() {
         val opacityHandle: ImageView = view.findViewById(R.id.opacity_handle)
         val darkTheme: GlobalProperties.DarkThemeProperty? = this.appSettings?.getDarkTheme(true)
         if (((resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES && darkTheme == GlobalProperties.DarkThemeProperty.AUTOMATIC) || darkTheme == GlobalProperties.DarkThemeProperty.DARK) {
+            opacityHandle.setImageDrawable(context?.resources?.getDrawable(R.drawable.floatingpanel_shape, context?.theme))
+        } else {
             opacityHandle.setImageDrawable(context?.resources?.getDrawable(R.drawable.floatingpanel_shape_dark, context?.theme))
         }
         val seekBar: SeekBar = view.findViewById(R.id.opacity_seek)

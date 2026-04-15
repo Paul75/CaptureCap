@@ -112,7 +112,7 @@ class RecordingCropBar : View {
 
     private val textPaint = Paint().apply {
         style = Paint.Style.FILL
-        color = resources.getColor(R.color.link_color_light)
+        color = resources.getColor(R.color.crop_text)
         textSize = timestampTextSize * context.resources.displayMetrics.scaledDensity
         isFakeBoldText = true
     }
@@ -140,14 +140,14 @@ class RecordingCropBar : View {
         val darkTheme: GlobalProperties.DarkThemeProperty = globalProperties.getDarkTheme(false)
 
         if (((getResources().configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES && darkTheme == GlobalProperties.DarkThemeProperty.AUTOMATIC) || darkTheme == GlobalProperties.DarkThemeProperty.DARK) {
-            trackPaint.color = resources.getColor(R.color.crop_track_paint)
-            selectedTrackPaint.color = resources.getColor(R.color.crop_selected_track_paint)
-            thumbDraggingPaint.color = resources.getColor(R.color.crop_thumb_dragging_paint)
-            thumbPaint.color = resources.getColor(R.color.crop_thumb_paint)
-            thumbBorderPaint.color = resources.getColor(R.color.crop_thumb_border_paint)
-            tickPaint.color = resources.getColor(R.color.crop_tick_paint)
+            trackPaint.color = resources.getColor(R.color.crop_track_paint_dark)
+            selectedTrackPaint.color = resources.getColor(R.color.crop_selected_track_paint_dark)
+            thumbDraggingPaint.color = resources.getColor(R.color.crop_thumb_dragging_paint_dark)
+            thumbPaint.color = resources.getColor(R.color.crop_thumb_paint_dark)
+            thumbBorderPaint.color = resources.getColor(R.color.crop_thumb_border_paint_dark)
+            tickPaint.color = resources.getColor(R.color.crop_tick_paint_dark)
             textPaint.color = resources.getColor(R.color.crop_text_dark)
-            cursorPaint.color = resources.getColor(R.color.crop_cursor_paint)
+            cursorPaint.color = resources.getColor(R.color.crop_cursor_paint_dark)
         }
 
         thumbSize = TypedValue.applyDimension(

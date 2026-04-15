@@ -554,7 +554,9 @@ class PlaybackRecorder(private var context: Context,
         }
         if (this.mMuxer != null) {
             try {
-                this.mMuxer?.stop()
+                if (this.mMuxerStarted) {
+                    this.mMuxer?.stop()
+                }
                 this.mMuxer?.release()
             } catch (exc: Exception) {
                 throw exc

@@ -388,16 +388,16 @@ class ScreenRecorder : Service() {
         if (this.runningService) {
             if (!this.isPaused) {
                 if (activityBinder != null) {
-                    activityBinder.recordingStart()
+                    activityBinder.recordingStart(false)
                 }
             } else {
                 if (this.isPaused && activityBinder != null) {
-                    activityBinder.recordingPause(this.timeRecorded)
+                    activityBinder.recordingPause(this.timeRecorded, false)
                 }
             }
         } else {
             if (this.isStopped && activityBinder != null) {
-                activityBinder.recordingStop()
+                activityBinder.recordingStop(false)
             }
         }
     }
@@ -600,7 +600,7 @@ class ScreenRecorder : Service() {
                 startForeground(NotificationID.NOTIFICATION_RECORDING_ID.ordinal, recordingStartedBuilder.build())
             }
             if (this.activityBinder != null) {
-                this.activityBinder?.recordingStart()
+                this.activityBinder?.recordingStart(true)
             }
     
             var width: Int
@@ -752,7 +752,7 @@ class ScreenRecorder : Service() {
         this.runningService = false
         tileBinder?.recordingState(false)
         if (!this.errorDir && this.activityBinder != null) {
-            this.activityBinder!!.recordingStop()
+            this.activityBinder!!.recordingStop(true)
         }
         if (this.panelBinder != null && this.showFloatingControls) {
             this.panelBinder?.setStop()
@@ -834,7 +834,7 @@ class ScreenRecorder : Service() {
         this.timeRecorded = this.timeRecorded + (SystemClock.elapsedRealtime() - this.timeStart)
         this.timeStart = 0L
         if (this.activityBinder != null) {
-            this.activityBinder?.recordingPause(this.timeRecorded)
+            this.activityBinder?.recordingPause(this.timeRecorded, true)
         }
         if (this.panelBinder != null && this.showFloatingControls) {
             this.panelBinder?.setPause(this.timeRecorded)

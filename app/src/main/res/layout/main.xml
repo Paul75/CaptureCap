@@ -7,7 +7,7 @@
 
     <LinearLayout
         android:id="@+id/statusbar"
-        android:background="@color/statusbar_light"
+        android:background="@color/statusbar"
         android:layout_width="match_parent"
         android:layout_height="1px"
         android:gravity="center_horizontal"

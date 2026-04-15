@@ -27,27 +27,25 @@ class AppInfo : AppCompatActivity() {
     private var licenseScroll: NestedScrollView? = null
 
     public override fun onCreate(bundle: Bundle?) {
-        super.onCreate(bundle)
         this.appSettings = GlobalProperties(baseContext)
 
         val darkTheme: GlobalProperties.DarkThemeProperty = this.appSettings!!.getDarkTheme(true)
+
         if (((getResources().configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES && darkTheme == GlobalProperties.DarkThemeProperty.AUTOMATIC) || darkTheme == GlobalProperties.DarkThemeProperty.DARK) {
-            setTheme(androidx.appcompat.R.style.Theme_AppCompat_DayNight)
+            setTheme(R.style.Theme_CaptureCap_Dark)
+        } else {
+            setTheme(R.style.Theme_CaptureCap_Light)
         }
 
+        super.onCreate(bundle)
         setContentView(R.layout.about)
 
         if (((getResources().configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES && darkTheme == GlobalProperties.DarkThemeProperty.AUTOMATIC) || darkTheme == GlobalProperties.DarkThemeProperty.DARK) {
-            setTheme(androidx.appcompat.R.style.Theme_AppCompat_DayNight)
-            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
             findViewById<LinearLayout>(R.id.contributorsboard).setBackgroundResource(R.drawable.contributorspanel_shape_dark)
-            findViewById<LinearLayout>(R.id.repoboard).setBackgroundResource(R.drawable.contributorspanel_shape_dark)
             findViewById<TextView>(R.id.repogithublink).setLinkTextColor(getColor(R.color.link_color_dark))
             findViewById<LinearLayout>(R.id.statusbar).setBackgroundColor(getColor(R.color.statusbar_dark))
             findViewById<Button>(R.id.showlicense).setBackground(getDrawable(R.drawable.button_background_dark))
             findViewById<Button>(R.id.showlicense).setTextColor(getColor(R.color.button_color_dark_background))
-        } else {
-            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
         }
 
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.VANILLA_ICE_CREAM) {

@@ -52,16 +52,15 @@ class SettingsPanel : AppCompatActivity(), PreferenceFragmentCompat.OnPreference
     }
 
     override fun onCreate(bundle: Bundle?) {
-        super.onCreate(bundle)
         val globalProperties = GlobalProperties(baseContext)
         this.appSettings = globalProperties
         val darkTheme: GlobalProperties.DarkThemeProperty = globalProperties.getDarkTheme(true)
         if (((getResources().configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES && darkTheme == GlobalProperties.DarkThemeProperty.AUTOMATIC) || darkTheme == GlobalProperties.DarkThemeProperty.DARK) {
-            setTheme(androidx.appcompat.R.style.Theme_AppCompat_DayNight)
-            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
+            setTheme(R.style.Theme_CaptureCap_Dark)
         } else {
-            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
+            setTheme(R.style.Theme_CaptureCap_Light)
         }
+        super.onCreate(bundle)
 
         setContentView(R.layout.settings_panel)
         if (((getResources().configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES && darkTheme == GlobalProperties.DarkThemeProperty.AUTOMATIC) || darkTheme == GlobalProperties.DarkThemeProperty.DARK) {
