@@ -1,0 +1,168 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center_horizontal"
+    android:layout_centerHorizontal="true">
+
+    <LinearLayout
+        android:id="@+id/statusbar"
+        android:background="@color/statusbar"
+        android:layout_width="match_parent"
+        android:layout_height="1px"
+        android:gravity="center_horizontal"
+        android:layout_centerHorizontal="true" />
+
+    <ScrollView
+        android:id="@+id/mainscroll"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fillViewport="true"
+        android:gravity="center">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="left"
+            android:orientation="vertical"
+            android:layout_centerHorizontal="true">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Bitcoin"
+                android:textSize="32sp"
+                android:layout_marginTop="64dp"
+                android:layout_marginLeft="16dp"
+                android:layout_marginBottom="16dp"
+                android:layout_centerHorizontal="true" />
+    
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center"
+                android:layout_centerHorizontal="true">
+        
+                <EditText
+                    android:id="@+id/bitcoin_wallet"
+                    android:layout_width="240dp"
+                    android:layout_height="wrap_content"
+                    android:textSize="14sp"
+                    android:editable="false"
+                    android:textIsSelectable="true"
+                    android:inputType="none"/>
+    
+                <Button
+                    android:id="@+id/copy_bitcoin_wallet"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingTop="10dp"
+                    android:paddingBottom="10dp"
+                    android:paddingLeft="20dp"
+                    android:paddingRight="20dp"
+                    android:text="@string/donate_copy_wallet"
+                    android:contentDescription="@string/donate_copy_wallet"
+                    android:background="@drawable/button_background"
+                    android:textColor="@color/button_color"
+                    android:textSize="12sp"
+                    android:layout_centerVertical="true"
+                    android:layout_centerHorizontal="true" />
+    
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Ethereum"
+                android:textSize="32sp"
+                android:layout_marginTop="64dp"
+                android:layout_marginLeft="16dp"
+                android:layout_marginBottom="16dp"
+                android:layout_centerHorizontal="true" />
+    
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center"
+                android:layout_centerHorizontal="true">
+        
+                <EditText
+                    android:id="@+id/ethereum_wallet"
+                    android:layout_width="240dp"
+                    android:layout_height="wrap_content"
+                    android:textSize="14sp"
+                    android:editable="false"
+                    android:textIsSelectable="true"
+                    android:inputType="none"/>
+    
+                <Button
+                    android:id="@+id/copy_ethereum_wallet"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingTop="10dp"
+                    android:paddingBottom="10dp"
+                    android:paddingLeft="20dp"
+                    android:paddingRight="20dp"
+                    android:text="@string/donate_copy_wallet"
+                    android:contentDescription="@string/donate_copy_wallet"
+                    android:background="@drawable/button_background"
+                    android:textColor="@color/button_color"
+                    android:textSize="12sp"
+                    android:layout_centerVertical="true"
+                    android:layout_centerHorizontal="true" />
+    
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Monero"
+                android:textSize="32sp"
+                android:layout_marginTop="64dp"
+                android:layout_marginLeft="16dp"
+                android:layout_marginBottom="16dp"
+                android:layout_centerHorizontal="true" />
+    
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center"
+                android:layout_marginBottom="64dp"
+                android:layout_centerHorizontal="true">
+        
+                <EditText
+                    android:id="@+id/monero_wallet"
+                    android:layout_width="240dp"
+                    android:layout_height="wrap_content"
+                    android:textSize="14sp"
+                    android:editable="false"
+                    android:textIsSelectable="true"
+                    android:inputType="none"/>
+    
+                <Button
+                    android:id="@+id/copy_monero_wallet"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingTop="10dp"
+                    android:paddingBottom="10dp"
+                    android:paddingLeft="20dp"
+                    android:paddingRight="20dp"
+                    android:text="@string/donate_copy_wallet"
+                    android:contentDescription="@string/donate_copy_wallet"
+                    android:background="@drawable/button_background"
+                    android:textColor="@color/button_color"
+                    android:textSize="12sp"
+                    android:layout_centerVertical="true"
+                    android:layout_centerHorizontal="true" />
+    
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </ScrollView>
+
+</LinearLayout>
+

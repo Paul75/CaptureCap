@@ -24,6 +24,8 @@ class AppInfo : AppCompatActivity() {
     private var contributorsAdapter: ContributorsAdapter? = null
     private var contributorsView: RecyclerView? = null
     private var licenseButton: Button? = null
+
+    private var donateButton: Button? = null
     private var licenseScroll: NestedScrollView? = null
 
     public override fun onCreate(bundle: Bundle?) {
@@ -46,6 +48,8 @@ class AppInfo : AppCompatActivity() {
             findViewById<LinearLayout>(R.id.statusbar).setBackgroundColor(getColor(R.color.statusbar_dark))
             findViewById<Button>(R.id.showlicense).setBackground(getDrawable(R.drawable.button_background_dark))
             findViewById<Button>(R.id.showlicense).setTextColor(getColor(R.color.button_color_dark_background))
+            findViewById<Button>(R.id.donate).setBackground(getDrawable(R.drawable.button_background_dark))
+            findViewById<Button>(R.id.donate).setTextColor(getColor(R.color.button_color_dark_background))
         }
 
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.VANILLA_ICE_CREAM) {
@@ -54,9 +58,14 @@ class AppInfo : AppCompatActivity() {
 
         this.licenseScroll = findViewById(R.id.mainscroll)
         this.licenseButton = findViewById(R.id.showlicense)
+        this.donateButton = findViewById(R.id.donate)
 
         this.licenseButton?.setOnClickListener {
             this@AppInfo.startActivity(Intent(this@AppInfo, LicenseScreen::class.java))
+        }
+
+        this.donateButton?.setOnClickListener {
+            this@AppInfo.startActivity(Intent(this@AppInfo, DonateScreen::class.java))
         }
 
         this.contributorsView = findViewById(R.id.contributorslist)

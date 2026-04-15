@@ -71,6 +71,15 @@
                 android:value="com.yepgoryo.CaptureCap.AppInfo"/>
         </activity>
         <activity
+            android:label="@string/donate_title"
+            android:name="com.yepgoryo.CaptureCap.DonateScreen"
+            android:exported="true"
+            android:parentActivityName="com.yepgoryo.CaptureCap.AppInfo">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.yepgoryo.CaptureCap.AppInfo"/>
+        </activity>
+        <activity
             android:theme="@style/Theme.AppCompat.Light.NoActionBar"
             android:label="@string/settings_title"
             android:name="com.yepgoryo.CaptureCap.PanelPositionScreen"
