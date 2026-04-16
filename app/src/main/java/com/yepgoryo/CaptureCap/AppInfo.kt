@@ -43,13 +43,7 @@ class AppInfo : AppCompatActivity() {
         setContentView(R.layout.about)
 
         if (((getResources().configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES && darkTheme == GlobalProperties.DarkThemeProperty.AUTOMATIC) || darkTheme == GlobalProperties.DarkThemeProperty.DARK) {
-            findViewById<LinearLayout>(R.id.contributorsboard).setBackgroundResource(R.drawable.contributorspanel_shape_dark)
-            findViewById<TextView>(R.id.repogithublink).setLinkTextColor(getColor(R.color.link_color_dark))
             findViewById<LinearLayout>(R.id.statusbar).setBackgroundColor(getColor(R.color.statusbar_dark))
-            findViewById<Button>(R.id.showlicense).setBackground(getDrawable(R.drawable.button_background_dark))
-            findViewById<Button>(R.id.showlicense).setTextColor(getColor(R.color.button_color_dark_background))
-            findViewById<Button>(R.id.donate).setBackground(getDrawable(R.drawable.button_background_dark))
-            findViewById<Button>(R.id.donate).setTextColor(getColor(R.color.button_color_dark_background))
         }
 
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.VANILLA_ICE_CREAM) {

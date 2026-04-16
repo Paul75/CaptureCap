@@ -172,9 +172,6 @@ class RecordingCropScreen : AppCompatActivity() {
             pauseIcon = VectorDrawableCompat.create(getResources(), R.drawable.icon_crop_pause, null)!!
             stopIcon = VectorDrawableCompat.create(getResources(), R.drawable.icon_crop_stop, null)!!
             selectionIcon = VectorDrawableCompat.create(getResources(), R.drawable.icon_crop_selection, null)!!
-
-            findViewById<Button>(R.id.cropVideo).setBackground(getDrawable(R.drawable.button_background_dark))
-            findViewById<Button>(R.id.cropVideo).setTextColor(getColor(R.color.button_color_dark_background))
         } else {
             zoomInIcon = VectorDrawableCompat.create(getResources(), R.drawable.icon_crop_zoom_in_color, null)!!
             zoomOutIcon = VectorDrawableCompat.create(getResources(), R.drawable.icon_crop_zoom_out_color, null)!!

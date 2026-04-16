@@ -11,9 +11,9 @@
         <item name="android:statusBarColor">@color/statusbar</item>
         <item name="android:navigationBarColor">@color/nav_bar_color</item>
 
-        <item name="android:textColor">@color/text_color</item>
-        <item name="android:textColorPrimary">@color/text_color</item>
-        <item name="android:textColorSecondary">@color/text_color_secondary</item>
+        <item name="android:textColorLink">@color/color_link</item>
+        <item name="android:textColorPrimary">@color/text_color_primary_dynamic</item>
+        <item name="android:textColorSecondary">@color/text_color_secondary_dynamic</item>
         <item name="android:windowBackground">@color/background</item>
         <item name="alertDialogTheme">@style/AlertDialogStyleLight</item>
         <item name="actionBarStyle">@style/ActionBarLight</item>
@@ -27,6 +27,7 @@
         <item name="homeAsUpIndicator">@drawable/icon_back</item>
 
         <item name="preferenceFragmentCompatStyle">@style/PreferenceThemeOverlayLight.CaptureCap</item>
+        <item name="colorBackgroundFloating">@color/background_dialog</item>
     </style>
 
     <style name="ButtonStyleLight" parent="@style/Widget.AppCompat.Button">
@@ -38,20 +39,9 @@
     </style>
 
     <style name="AlertDialogStyleLight" parent="@style/ThemeOverlay.AppCompat.Dialog.Alert">
-        <item name="colorBackgroundFloating">@color/background_dialog</item>
         <item name="colorPrimary">@color/primary</item>
         <item name="android:actionMenuTextColor">@color/text_color</item>
         <item name="textColorAlertDialogListItem">@color/text_color</item>
-
-        <item name="android:colorControlHighlight">@color/color_control_highlight</item>
-        <item name="android:colorControlActivated">@color/color_control_activated</item>
-        <item name="android:colorControlNormal">@color/color_control_normal</item>
-
-        <item name="android:colorPrimary">@color/primary</item>
-        <item name="android:colorPrimaryDark">@color/primaryDark</item>
-        <item name="android:textColorPrimary">@color/text_color</item>
-        <item name="android:textColorPrimaryInverse">@color/text_color</item>
-        <item name="android:textColorSecondary">@color/text_color_secondary</item>
     </style>
 
     <style name="ActionBarLight" parent="@style/Widget.AppCompat.Light.ActionBar">
@@ -86,9 +76,9 @@
         <item name="android:statusBarColor">@color/statusbar_dark</item>
         <item name="android:navigationBarColor">@color/nav_bar_color_dark</item>
 
-        <item name="android:textColor">@color/text_color_dark</item>
-        <item name="android:textColorPrimary">@color/text_color_dark</item>
-        <item name="android:textColorSecondary">@color/text_color_secondary_dark</item>
+        <item name="android:textColorLink">@color/color_link_dark</item>
+        <item name="android:textColorPrimary">@color/text_color_primary_dynamic_dark</item>
+        <item name="android:textColorSecondary">@color/text_color_secondary_dynamic_dark</item>
         <item name="android:windowBackground">@color/background_dark</item>
         <item name="alertDialogTheme">@style/AlertDialogStyleDark</item>
         <item name="actionBarStyle">@style/ActionBarDark</item>
@@ -102,6 +92,7 @@
         <item name="homeAsUpIndicator">@drawable/icon_back_dark</item>
 
         <item name="preferenceFragmentCompatStyle">@style/PreferenceThemeOverlayDark.CaptureCap</item>
+        <item name="colorBackgroundFloating">@color/background_dialog_dark</item>
     </style>
 
     <style name="ButtonStyleDark" parent="@style/Widget.AppCompat.Button">
@@ -113,20 +104,9 @@
     </style>
 
     <style name="AlertDialogStyleDark" parent="@style/ThemeOverlay.AppCompat.Dialog.Alert">
-        <item name="colorBackgroundFloating">@color/background_dialog_dark</item>
         <item name="colorPrimary">@color/primary_dark</item>
         <item name="android:actionMenuTextColor">@color/text_color_dark</item>
         <item name="textColorAlertDialogListItem">@color/text_color_dark</item>
-
-        <item name="android:colorControlHighlight">@color/color_control_highlight_dark</item>
-        <item name="android:colorControlActivated">@color/color_control_activated_dark</item>
-        <item name="android:colorControlNormal">@color/color_control_normal_dark</item>
-
-        <item name="android:colorPrimary">@color/primary_dark</item>
-        <item name="android:colorPrimaryDark">@color/primaryDark_dark</item>
-        <item name="android:textColorPrimary">@color/text_color_dark</item>
-        <item name="android:textColorPrimaryInverse">@color/text_color_dark</item>
-        <item name="android:textColorSecondary">@color/text_color_secondary_dark</item>
     </style>
 
     <style name="ActionBarDark" parent="@style/Widget.AppCompat.Light.ActionBar">
@@ -160,9 +140,9 @@
         <item name="android:statusBarColor">@color/statusbar</item>
         <item name="android:navigationBarColor">@color/nav_bar_color</item>
 
-        <item name="android:textColor">@color/text_color</item>
-        <item name="android:textColorPrimary">@color/text_color</item>
-        <item name="android:textColorSecondary">@color/text_color_secondary</item>
+        <item name="android:textColorLink">@color/color_link</item>
+        <item name="android:textColorPrimary">@color/text_color_primary_dynamic</item>
+        <item name="android:textColorSecondary">@color/text_color_secondary_dynamic</item>
         <item name="android:windowBackground">@color/background</item>
         <item name="alertDialogTheme">@style/AlertDialogStyleLight</item>
 
@@ -175,6 +155,7 @@
         <item name="homeAsUpIndicator">@drawable/icon_back</item>
 
         <item name="preferenceFragmentCompatStyle">@style/PreferenceThemeOverlayLight.CaptureCap</item>
+        <item name="colorBackgroundFloating">@color/background_dialog</item>
     </style>
 
     <style name="Theme.CaptureCap.Dark.NoActionBar" parent="Theme.AppCompat.Light.NoActionBar">
@@ -187,9 +168,9 @@
         <item name="android:statusBarColor">@color/statusbar_dark</item>
         <item name="android:navigationBarColor">@color/nav_bar_color_dark</item>
 
-        <item name="android:textColor">@color/text_color_dark</item>
-        <item name="android:textColorPrimary">@color/text_color_dark</item>
-        <item name="android:textColorSecondary">@color/text_color_secondary_dark</item>
+        <item name="android:textColorLink">@color/color_link_dark</item>
+        <item name="android:textColorPrimary">@color/text_color_primary_dynamic_dark</item>
+        <item name="android:textColorSecondary">@color/text_color_secondary_dynamic_dark</item>
         <item name="android:windowBackground">@color/background_dark</item>
         <item name="alertDialogTheme">@style/AlertDialogStyleDark</item>
 
@@ -202,6 +183,7 @@
         <item name="homeAsUpIndicator">@drawable/icon_back_dark</item>
 
         <item name="preferenceFragmentCompatStyle">@style/PreferenceThemeOverlayDark.CaptureCap</item>
+        <item name="colorBackgroundFloating">@color/background_dialog_dark</item>
     </style>
 
 </resources>

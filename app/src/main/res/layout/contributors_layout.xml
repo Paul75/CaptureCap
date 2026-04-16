@@ -15,6 +15,7 @@
         <TextView
             android:id="@+id/contributor_name"
             android:textSize="20sp"
+            android:textColor="?android:attr/textColorPrimary"
             android:textStyle="bold|italic"
             android:gravity="center"
             android:layout_width="wrap_content"
@@ -24,6 +25,7 @@
             android:id="@+id/contributor_role"
             android:paddingTop="10dp"
             android:textSize="14sp"
+            android:textColor="?android:attr/textColorSecondary"
             android:gravity="center"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />

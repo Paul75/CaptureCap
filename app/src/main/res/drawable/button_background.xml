@@ -2,7 +2,7 @@
     android:shape="rectangle">
 
     <stroke
-        android:color="@color/button_color"
+        android:color="?android:attr/textColorPrimary"
         android:width="3dp"/>
     <corners 
         android:radius="50dp"/>

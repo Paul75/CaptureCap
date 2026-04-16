@@ -18,6 +18,7 @@
             android:layout_height="wrap_content"
             android:layout_width="match_parent"
             android:textSize="24sp"
+            android:textColor="?android:attr/textColorPrimary"
             android:gravity="center"
             android:text="@string/quality_normal" />
 

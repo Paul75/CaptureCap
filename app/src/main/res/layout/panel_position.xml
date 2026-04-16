@@ -17,6 +17,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:textSize="22sp"
+        android:textColor="?android:attr/textColorPrimary"
         android:orientation="vertical"
         android:id="@+id/mainposition"
         android:gravity="center"
