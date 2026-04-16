@@ -374,7 +374,12 @@ class ScreenRecorder : Service() {
         }
         this.recordingNotificationManager = NotificationManagerCompat.from(this)
         if (this.recordingNotificationManager!!.getNotificationChannel(NOTIFICATIONS_RECORDING_CHANNEL) == null) {
-            this.recordingNotificationManager!!.createNotificationChannel(NotificationChannelCompat.Builder(NOTIFICATIONS_RECORDING_CHANNEL, NotificationManager.IMPORTANCE_HIGH).setName(getString(R.string.notifications_channel)).setLightsEnabled(true).setLightColor(android.graphics.Color.RED).setShowBadge(true).setVibrationEnabled(true).build())
+            val vibrate = this.appSettings!!.getBooleanProperty(GlobalProperties.PropertiesBoolean.ENABLE_VIBRATION, false)
+            var importance = NotificationManager.IMPORTANCE_HIGH
+            if (!vibrate) {
+                importance = NotificationManager.IMPORTANCE_MIN
+            }
+            this.recordingNotificationManager!!.createNotificationChannel(NotificationChannelCompat.Builder(NOTIFICATIONS_RECORDING_CHANNEL, importance).setName(getString(R.string.notifications_channel)).setLightsEnabled(true).setLightColor(android.graphics.Color.RED).setShowBadge(true).setVibrationEnabled(vibrate).build())
         }
         this.runningService = true
         if (this.tileBinder != null) {

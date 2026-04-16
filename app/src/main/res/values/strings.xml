@@ -63,6 +63,8 @@
     <string name="dontnotifyonfinish_option_description">Don\'t get notified that recording just finished</string>
     <string name="dontnotifyonrotate_option">Don\'t notify on rotate</string>
     <string name="dontnotifyonrotate_option_description">Don\'t notify on new recording start when screen rotates</string>
+    <string name="enablevibration_option">Enable vibration</string>
+    <string name="enablevibration_option_description">Enable vibration on recording start, pause and end</string>
     <string name="minimizeonstart_option">Minimize on start</string>
     <string name="minimizeonstart_option_description">Minimize the app when a new recording starts</string>
     <string name="norotate_option">Don\'t restart recording on rotate</string>

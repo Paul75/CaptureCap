@@ -30,6 +30,11 @@ class SettingsFragment : PreferenceFragmentCompat() {
             preferenceCategory2.removePreference(preferenceFindPreference6)
             preferenceCategory2.removePreference(preferenceFindPreference7)
         }
+        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.O) {
+            val preferenceFindPreference8: Preference = findPreference("enablevibration")!!
+            val preferenceCategory3: PreferenceCategory = findPreference("capturesettings")!!
+            preferenceCategory3.removePreference(preferenceFindPreference8)
+        }
     }
 
     override fun onDisplayPreferenceDialog(preference: Preference) {

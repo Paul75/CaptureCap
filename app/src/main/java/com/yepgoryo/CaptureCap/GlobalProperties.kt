@@ -61,6 +61,7 @@ class GlobalProperties(context: Context) {
         AUD_SOURCE_UNKNOWN,
         DONT_NOTIFY_ON_FINISH,
         DONT_NOTIFY_ON_ROTATE,
+        ENABLE_VIBRATION,
         MINIMIZE_ON_START,
         NO_ROTATE
     }

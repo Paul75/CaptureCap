@@ -113,6 +113,12 @@
             android:defaultValue="false" />
 
         <CheckBoxPreference
+            android:key="enablevibration"
+            android:summary="@string/enablevibration_option_description"
+            android:title="@string/enablevibration_option"
+            android:defaultValue="false" />
+
+        <CheckBoxPreference
             android:key="minimizeonstart"
             android:summary="@string/minimizeonstart_option_description"
             android:title="@string/minimizeonstart_option"
