@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="512"
+   height="512"
+   viewBox="0 0 135.46667 135.46667"
+   version="1.1"
+   id="svg5"
+   inkscape:version="1.4.2 (f4327f4, 2025-05-13)"
+   sodipodi:docname="icon_record_stream.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:dc="http://purl.org/dc/elements/1.1/">
+  <title
+     id="title1">CaptureCap stream property icon</title>
+  <sodipodi:namedview
+     id="namedview7"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:document-units="mm"
+     showgrid="false"
+     units="px"
+     width="2048px"
+     inkscape:zoom="0.25"
+     inkscape:cx="-586"
+     inkscape:cy="106"
+     inkscape:window-width="1920"
+     inkscape:window-height="1001"
+     inkscape:window-x="-9"
+     inkscape:window-y="-9"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg5"
+     inkscape:showpageshadow="2"
+     inkscape:deskcolor="#d1d1d1" />
+  <defs
+     id="defs2" />
+  <metadata
+     id="metadata1">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:creator>
+          <cc:Agent>
+            <dc:title>Egor Olegovich Yakovlev</dc:title>
+          </cc:Agent>
+        </dc:creator>
+        <dc:title>CaptureCap stream property icon</dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     id="g7"
+     transform="matrix(0.3581538,-0.61930776,0.62034057,0.35755751,-2.1760546,86.618335)"
+     style="stroke-width:1.39721">
+    <path
+       id="path5"
+       style="fill:none;stroke:#484848;stroke-width:14.7871;stroke-linecap:round;stroke-linejoin:round"
+       d="m 17.462502,55.857622 c 0,-8.601914 9.909357,-16.55041 25.995312,-20.851367 16.085955,-4.300957 35.904669,-4.300956 51.990624,10e-7 16.085952,4.300957 25.995312,12.249452 25.995312,20.851366"
+       sodipodi:nodetypes="cssc" />
+    <path
+       id="path6"
+       style="fill:none;stroke:#484848;stroke-width:14.7871;stroke-linecap:round;stroke-linejoin:round"
+       d="m 36.688254,69.642772 c 0,-4.445385 6.244949,-8.553089 16.382436,-10.775782 10.137487,-2.222692 22.627386,-2.222691 32.764872,10e-7 10.137485,2.222692 16.382438,6.330396 16.382438,10.775781"
+       sodipodi:nodetypes="cssc" />
+    <path
+       id="path7"
+       style="fill:none;stroke:#484848;stroke-width:14.7871;stroke-linecap:round;stroke-linejoin:round"
+       d="m 47.17452,89.514176 c 0,-2.178868 4.246279,-4.192225 11.139303,-5.28166 6.893025,-1.089434 15.385582,-1.089433 22.278607,10e-7 6.893023,1.089434 11.139304,3.102791 11.139304,5.281659"
+       sodipodi:nodetypes="cssc" />
+  </g>
+  <ellipse
+     style="fill:#484848;fill-opacity:1;stroke:none;stroke-width:10.5833;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
+     id="path8"
+     cx="127.18124"
+     cy="26.239414"
+     rx="11.461375"
+     ry="13.912553"
+     transform="matrix(0.86638579,0.49937528,-0.50062499,0.86566426,0,0)" />
+</svg>

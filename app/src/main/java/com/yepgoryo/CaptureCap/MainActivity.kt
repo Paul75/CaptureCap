@@ -29,16 +29,17 @@ import android.widget.RelativeLayout
 import android.widget.TextView
 import android.widget.Toast
 import android.provider.Settings
-import android.util.Log
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.app.AppCompatDelegate
 import androidx.appcompat.widget.TooltipCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updatePadding
 import androidx.vectordrawable.graphics.drawable.VectorDrawableCompat
+import android.view.LayoutInflater
+import android.widget.CheckBox
+import android.widget.EditText
 
 class MainActivity : AppCompatActivity() {
 
@@ -57,6 +58,7 @@ class MainActivity : AppCompatActivity() {
     var modesPanel: LinearLayout? = null
     var optionsPanel: LinearLayout? = null
     var recordAudioSetting: ImageButton? = null
+    var recordStreamSetting: ImageButton? = null
     var recordDelete: ImageButton? = null
     private var recordDeleteIcon: VectorDrawableCompat? = null
 
@@ -73,6 +75,8 @@ class MainActivity : AppCompatActivity() {
     private var recordOpenIcon: VectorDrawableCompat? = null
     private var recordPlaybackState: VectorDrawableCompat? = null
     private var recordPlaybackStateDisabled: VectorDrawableCompat? = null
+    private var recordStreamState: VectorDrawableCompat? = null
+    private var recordStreamStateDisabled: VectorDrawableCompat? = null
     var recordScreenSetting: ImageButton? = null
     private var recordScreenState: VectorDrawableCompat? = null
     private var recordScreenStateDisabled: VectorDrawableCompat? = null
@@ -94,7 +98,15 @@ class MainActivity : AppCompatActivity() {
     private var isRecording: Boolean = false
     private var recordMicrophone: Boolean = false
     private var recordPlayback: Boolean = false
+    private var recordStream: Boolean = false
+    private var saveStreamToFile: Boolean = false
     private var recordOnlyAudio: Boolean = false
+
+    data class StreamCredentialsData(
+        val url: String,
+        val key: String,
+        val tofile: Boolean
+    )
 
     private var mConnection: ServiceConnection = object: ServiceConnection {
         override fun onServiceConnected(componentName: ComponentName, iBinder: IBinder) {
@@ -196,8 +208,11 @@ class MainActivity : AppCompatActivity() {
     private fun updateRecordModeData() {
         this.recordMicrophone = this.appSettings!!.getBooleanProperty(GlobalProperties.PropertiesBoolean.CHECK_SOUND_MIC, false)
         this.recordPlayback = this.appSettings!!.getBooleanProperty(GlobalProperties.PropertiesBoolean.CHECK_SOUND_PLAYBACK, false)
+        this.recordStream = this.appSettings!!.getBooleanProperty(GlobalProperties.PropertiesBoolean.CHECK_STREAM, false)
+        this.saveStreamToFile = appSettings!!.getBooleanProperty(GlobalProperties.PropertiesBoolean.STREAM_SAVE_TO_FILE, false)
         if (this.recordPlayback && Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
             this.recordPlayback = false
+            this.recordStream = false
         }
         this.recordOnlyAudio = this.appSettings!!.getBooleanProperty(GlobalProperties.PropertiesBoolean.RECORD_MODE, false)
         if (this.recordOnlyAudio && !this.recordPlayback && !this.recordMicrophone) {
@@ -207,69 +222,86 @@ class MainActivity : AppCompatActivity() {
 
     inner class ActivityBinder : Binder() {
         fun recordingStart(stateToRestore: Boolean) {
-            this@MainActivity.timeCounter!!.stop()
-            this@MainActivity.timeCounter!!.setBase(this@MainActivity.recordingBinder!!.getTimeStart())
-            this@MainActivity.timeCounter!!.start()
-            this@MainActivity.audioPlaybackUnavailable!!.visibility = View.GONE
-            this@MainActivity.modesPanel!!.visibility = View.GONE
-            this@MainActivity.optionsPanel!!.visibility = View.GONE
-            this@MainActivity.recordingState = ActionState.RECORDING_IN_PROGRESS
-            if (stateToRestore) {
-                this@MainActivity.showCounter(true, RecordButton.ButtonState.TRANSITION_TO_RECORDING)
-            } else {
-                this@MainActivity.timeCounter!!.scaleX = 1.0f
-                this@MainActivity.timeCounter!!.scaleY = 1.0f
-                this@MainActivity.timerPanel!!.visibility = View.VISIBLE
-                this@MainActivity.mainRecordingButton!!.transitionToButtonState(RecordButton.ButtonState.WHILE_RECORDING_NORMAL)
+            runOnUiThread {
+                this@MainActivity.timeCounter!!.stop()
+                this@MainActivity.timeCounter!!.setBase(this@MainActivity.recordingBinder!!.getTimeStart())
+                this@MainActivity.timeCounter!!.start()
+                this@MainActivity.audioPlaybackUnavailable!!.visibility = View.GONE
+                this@MainActivity.modesPanel!!.visibility = View.GONE
+                this@MainActivity.optionsPanel!!.visibility = View.GONE
+                this@MainActivity.recordingState = ActionState.RECORDING_IN_PROGRESS
+                if (stateToRestore) {
+                    this@MainActivity.showCounter(
+                        true,
+                        RecordButton.ButtonState.TRANSITION_TO_RECORDING
+                    )
+                } else {
+                    this@MainActivity.timeCounter!!.scaleX = 1.0f
+                    this@MainActivity.timeCounter!!.scaleY = 1.0f
+                    this@MainActivity.timerPanel!!.visibility = View.VISIBLE
+                    this@MainActivity.mainRecordingButton!!.transitionToButtonState(RecordButton.ButtonState.WHILE_RECORDING_NORMAL)
+                }
             }
         }
 
         fun recordingStop(stateToRestore: Boolean) {
-            this@MainActivity.timeCounter!!.stop()
-            this@MainActivity.timeCounter!!.setBase(SystemClock.elapsedRealtime())
-            this@MainActivity.audioPlaybackUnavailable!!.visibility = View.GONE
-            this@MainActivity.modesPanel!!.visibility = View.GONE
-            this@MainActivity.optionsPanel!!.visibility = View.GONE
-            this@MainActivity.finishedPanel!!.visibility = View.VISIBLE
-            this@MainActivity.recordStop!!.setVisibility(View.GONE)
-            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
-                this@MainActivity.audioPlaybackUnavailable!!.visibility = View.VISIBLE
-            }
-            this@MainActivity.recordingState = ActionState.RECORDING_ENDED
-            if (stateToRestore) {
-                this@MainActivity.showCounter(false, RecordButton.ButtonState.TRANSITION_TO_RECORDING_END)
-            } else {
-                this@MainActivity.timerPanel!!.visibility = View.GONE
-                this@MainActivity.mainRecordingButton!!.transitionToButtonState(RecordButton.ButtonState.ENDED_RECORDING_NORMAL)
+            runOnUiThread {
+                this@MainActivity.timeCounter!!.stop()
+                this@MainActivity.timeCounter!!.setBase(SystemClock.elapsedRealtime())
+                this@MainActivity.audioPlaybackUnavailable!!.visibility = View.GONE
+                this@MainActivity.modesPanel!!.visibility = View.GONE
+                this@MainActivity.optionsPanel!!.visibility = View.GONE
+                this@MainActivity.finishedPanel!!.visibility = View.VISIBLE
+                if (recordStream && !saveStreamToFile) {
+                    this@MainActivity.finishedPanel!!.visibility = View.GONE
+                }
+                this@MainActivity.recordStop!!.setVisibility(View.GONE)
+                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+                    this@MainActivity.audioPlaybackUnavailable!!.visibility = View.VISIBLE
+                }
                 this@MainActivity.recordingState = ActionState.RECORDING_ENDED
+                if (stateToRestore) {
+                    this@MainActivity.showCounter(
+                        false,
+                        RecordButton.ButtonState.TRANSITION_TO_RECORDING_END
+                    )
+                } else {
+                    this@MainActivity.timerPanel!!.visibility = View.GONE
+                    this@MainActivity.mainRecordingButton!!.transitionToButtonState(RecordButton.ButtonState.ENDED_RECORDING_NORMAL)
+                    this@MainActivity.recordingState = ActionState.RECORDING_ENDED
+                }
             }
         }
 
         fun recordingPause(j: Long, stateToRestore: Boolean) {
-            this@MainActivity.timeCounter!!.setBase(SystemClock.elapsedRealtime() - j)
-            this@MainActivity.timeCounter!!.stop()
-            this@MainActivity.modesPanel!!.visibility = View.GONE
-            this@MainActivity.optionsPanel!!.visibility = View.GONE
-            this@MainActivity.timeCounter!!.scaleX = 1.0f
-            this@MainActivity.timeCounter!!.scaleY = 1.0f
-            this@MainActivity.timerPanel!!.visibility = View.VISIBLE
-            this@MainActivity.recordStop!!.setVisibility(View.VISIBLE)
-            this@MainActivity.recordingState = ActionState.RECORDING_PAUSED
-            if (stateToRestore) {
-                this@MainActivity.mainRecordingButton!!.transitionToButtonState(RecordButton.ButtonState.TRANSITION_TO_RECORDING_PAUSE)
-            } else {
-                this@MainActivity.mainRecordingButton!!.transitionToButtonState(RecordButton.ButtonState.WHILE_PAUSE_NORMAL)
+            runOnUiThread {
+                this@MainActivity.timeCounter!!.setBase(SystemClock.elapsedRealtime() - j)
+                this@MainActivity.timeCounter!!.stop()
+                this@MainActivity.modesPanel!!.visibility = View.GONE
+                this@MainActivity.optionsPanel!!.visibility = View.GONE
+                this@MainActivity.timeCounter!!.scaleX = 1.0f
+                this@MainActivity.timeCounter!!.scaleY = 1.0f
+                this@MainActivity.timerPanel!!.visibility = View.VISIBLE
+                this@MainActivity.recordStop!!.setVisibility(View.VISIBLE)
                 this@MainActivity.recordingState = ActionState.RECORDING_PAUSED
+                if (stateToRestore) {
+                    this@MainActivity.mainRecordingButton!!.transitionToButtonState(RecordButton.ButtonState.TRANSITION_TO_RECORDING_PAUSE)
+                } else {
+                    this@MainActivity.mainRecordingButton!!.transitionToButtonState(RecordButton.ButtonState.WHILE_PAUSE_NORMAL)
+                    this@MainActivity.recordingState = ActionState.RECORDING_PAUSED
+                }
             }
         }
 
         fun recordingResume(time: Long) {
-            this@MainActivity.timeCounter!!.setBase(time)
-            this@MainActivity.timeCounter!!.start()
-            this@MainActivity.recordStop!!.setVisibility(View.GONE)
+            runOnUiThread {
+                this@MainActivity.timeCounter!!.setBase(time)
+                this@MainActivity.timeCounter!!.start()
+                this@MainActivity.recordStop!!.setVisibility(View.GONE)
 
-            this@MainActivity.mainRecordingButton!!.transitionToButtonState(RecordButton.ButtonState.TRANSITION_FROM_PAUSE)
-            this@MainActivity.recordingState = ActionState.RECORDING_IN_PROGRESS
+                this@MainActivity.mainRecordingButton!!.transitionToButtonState(RecordButton.ButtonState.TRANSITION_FROM_PAUSE)
+                this@MainActivity.recordingState = ActionState.RECORDING_IN_PROGRESS
+            }
         }
 
         fun recordingReset() {
@@ -418,6 +450,8 @@ class MainActivity : AppCompatActivity() {
             this.recordMicrophoneStateDisabled = VectorDrawableCompat.create(getResources(), R.drawable.icon_record_mic_disabled_dark, null)
             this.recordPlaybackState = VectorDrawableCompat.create(getResources(), R.drawable.icon_record_audio_dark, null)
             this.recordPlaybackStateDisabled = VectorDrawableCompat.create(getResources(), R.drawable.icon_record_audio_disabled_dark, null)
+            this.recordStreamState = VectorDrawableCompat.create(getResources(), R.drawable.icon_record_stream_dark, null)
+            this.recordStreamStateDisabled = VectorDrawableCompat.create(getResources(), R.drawable.icon_record_stream_disabled_dark, null)
             this.recordInfoIcon = VectorDrawableCompat.create(getResources(), R.drawable.icon_record_info_dark, null)
             this.recordSettingsIcon = VectorDrawableCompat.create(getResources(), R.drawable.icon_record_settings_dark, null)
             this.recordShareIcon = VectorDrawableCompat.create(getResources(), R.drawable.icon_record_share_dark, null)
@@ -432,6 +466,8 @@ class MainActivity : AppCompatActivity() {
             this.recordMicrophoneStateDisabled = VectorDrawableCompat.create(getResources(), R.drawable.icon_record_mic_disabled, null)
             this.recordPlaybackState = VectorDrawableCompat.create(getResources(), R.drawable.icon_record_audio, null)
             this.recordPlaybackStateDisabled = VectorDrawableCompat.create(getResources(), R.drawable.icon_record_audio_disabled, null)
+            this.recordStreamState = VectorDrawableCompat.create(getResources(), R.drawable.icon_record_stream, null)
+            this.recordStreamStateDisabled = VectorDrawableCompat.create(getResources(), R.drawable.icon_record_stream_disabled, null)
             this.recordInfoIcon = VectorDrawableCompat.create(getResources(), R.drawable.icon_record_info, null)
             this.recordSettingsIcon = VectorDrawableCompat.create(getResources(), R.drawable.icon_record_settings, null)
             this.recordShareIcon = VectorDrawableCompat.create(getResources(), R.drawable.icon_record_share, null)
@@ -453,7 +489,7 @@ class MainActivity : AppCompatActivity() {
                         this@MainActivity.mainRecordingButton!!.transitionToButtonState(RecordButton.ButtonState.TRANSITION_FROM_PAUSE)
                         this@MainActivity.recordingBinder!!.recordingResume()
                     } else if (this@MainActivity.recordingState != ActionState.RECORDING_STOPPED) {
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && !recordStream) {
                             this@MainActivity.recordingBinder!!.recordingPause()
                         } else {
                             this@MainActivity.recordingBinder!!.stopService()
@@ -468,6 +504,7 @@ class MainActivity : AppCompatActivity() {
         this.recordScreenSetting = findViewById<ImageButton>(R.id.recordscreen)!!
         this.recordMicrophoneSetting = findViewById<ImageButton>(R.id.recordmicrohone)!!
         this.recordAudioSetting = findViewById<ImageButton>(R.id.recordaudio)!!
+        this.recordStreamSetting = findViewById<ImageButton>(R.id.recordstream)!!
         this.recordInfo = findViewById<ImageButton>(R.id.openinfo)!!
         this.recordSettings = findViewById<ImageButton>(R.id.opensettings)!!
         this.recordShare = findViewById<ImageButton>(R.id.sharerecord)!!
@@ -478,6 +515,7 @@ class MainActivity : AppCompatActivity() {
         this.recordScreenSetting!!.setImageDrawable(this.recordScreenStateDisabled)
         this.recordMicrophoneSetting!!.setImageDrawable(this.recordMicrophoneStateDisabled)
         this.recordAudioSetting!!.setImageDrawable(this.recordPlaybackStateDisabled)
+        this.recordStreamSetting!!.setImageDrawable(this.recordStreamStateDisabled)
         this.recordInfo!!.setImageDrawable(this.recordInfoIcon)
         this.recordSettings!!.setImageDrawable(this.recordSettingsIcon)
         this.recordShare!!.setImageDrawable(this.recordShareIcon)
@@ -488,10 +526,12 @@ class MainActivity : AppCompatActivity() {
         this.recordScreenSetting!!.setContentDescription(getResources().getString(R.string.setting_record_screen) + ": " + getResources().getString(R.string.option_deactivated))
         this.recordMicrophoneSetting!!.setContentDescription(getResources().getString(R.string.setting_audio_record_microphone_sound) + ": " + getResources().getString(R.string.option_deactivated))
         this.recordAudioSetting!!.setContentDescription(getResources().getString(R.string.setting_audio_record_playback_sound) + ": " + getResources().getString(R.string.option_deactivated))
+        this.recordStreamSetting!!.setContentDescription(getResources().getString(R.string.setting_enable_stream) + ": " + getResources().getString(R.string.option_deactivated))
 
         this.recordScreenSetting!!.let { TooltipCompat.setTooltipText(it, getResources().getString(R.string.setting_record_screen)) }
         this.recordMicrophoneSetting!!.let { TooltipCompat.setTooltipText(it, getResources().getString(R.string.setting_audio_record_microphone_sound)) }
         this.recordAudioSetting!!.let { TooltipCompat.setTooltipText(it, getResources().getString(R.string.setting_audio_record_playback_sound)) }
+        this.recordStreamSetting!!.let { TooltipCompat.setTooltipText(it, getResources().getString(R.string.setting_enable_stream)) }
         this.recordInfo!!.let { TooltipCompat.setTooltipText(it, getResources().getString(R.string.info_title)) }
         this.recordSettings!!.let { TooltipCompat.setTooltipText(it, getResources().getString(R.string.settings_title)) }
         this.recordShare!!.let { TooltipCompat.setTooltipText(it, getResources().getString(R.string.record_share)) }
@@ -510,6 +550,7 @@ class MainActivity : AppCompatActivity() {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
             this.audioPlaybackUnavailable!!.visibility = View.VISIBLE
             this.recordAudioSetting!!.setVisibility(View.GONE)
+            this.recordStreamSetting!!.setVisibility(View.GONE)
             this.recordCrop!!.setVisibility(View.GONE)
         }
         if (!this.recordOnlyAudio) {
@@ -523,6 +564,10 @@ class MainActivity : AppCompatActivity() {
         if (this.recordPlayback) {
             this.recordAudioSetting!!.setImageDrawable(this.recordPlaybackState)
             this.recordAudioSetting!!.setContentDescription(getResources().getString(R.string.setting_audio_record_playback_sound) + ": " + getResources().getString(R.string.option_activated))
+        }
+        if (this.recordStream) {
+            this.recordStreamSetting!!.setImageDrawable(this.recordStreamState)
+            this.recordStreamSetting!!.setContentDescription(getResources().getString(R.string.setting_enable_stream) + ": " + getResources().getString(R.string.option_activated))
         }
         setRecordMode(this.appSettings!!.getBooleanProperty(GlobalProperties.PropertiesBoolean.RECORD_MODE, false))
         this.activityProjectionManager = getSystemService("media_projection") as MediaProjectionManager
@@ -632,6 +677,42 @@ class MainActivity : AppCompatActivity() {
             this@MainActivity.updateRecordButtonConditions()
         }
 
+        this.recordStreamSetting!!.setOnClickListener {
+            this@MainActivity.mainRecordingButton!!.releaseFocus()
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                if (!this@MainActivity.recordStream) {
+                    showStreamCredentialsDialog() { data ->
+                        if (data != null) {
+                            if (!data.url.isEmpty()) {
+                                this@MainActivity.recordStream = true
+                                this@MainActivity.appSettings?.setBooleanProperty(GlobalProperties.PropertiesBoolean.CHECK_STREAM, true)
+                                this@MainActivity.recordStreamSetting!!.setImageDrawable(this@MainActivity.recordStreamState)
+                                this@MainActivity.recordStreamSetting!!.setContentDescription(
+                                    this@MainActivity.getResources()
+                                        .getString(R.string.setting_enable_stream) + ": " + this@MainActivity.getResources()
+                                        .getString(R.string.option_activated)
+                                )
+                            }
+                        }
+                    }
+                } else {
+                    this@MainActivity.recordStream = false
+                    this@MainActivity.appSettings?.setBooleanProperty(GlobalProperties.PropertiesBoolean.CHECK_STREAM, false)
+                    this@MainActivity.recordStreamSetting!!.setImageDrawable(this@MainActivity.recordStreamStateDisabled)
+                    this@MainActivity.recordStreamSetting!!.setContentDescription(
+                        this@MainActivity.getResources()
+                            .getString(R.string.setting_enable_stream) + ": " + this@MainActivity.getResources()
+                            .getString(R.string.option_deactivated)
+                    )
+                }
+            } else {
+                this@MainActivity.recordStream = false
+                this@MainActivity.recordStreamSetting!!.setImageDrawable(this@MainActivity.recordStreamStateDisabled)
+                this@MainActivity.recordStreamSetting!!.setContentDescription(this@MainActivity.getResources().getString(R.string.setting_enable_stream) + ": " + this@MainActivity.getResources().getString(R.string.option_deactivated))
+            }
+        }
+
         this.recordShare!!.setOnClickListener {
             this@MainActivity.mainRecordingButton!!.releaseFocus()
             this@MainActivity.recordingBinder!!.recordingShare()
@@ -660,6 +741,59 @@ class MainActivity : AppCompatActivity() {
         this.recordSettings!!.setOnClickListener {
             this@MainActivity.mainRecordingButton!!.releaseFocus()
             this@MainActivity.startActivity(Intent(this@MainActivity, SettingsPanel::class.java))
+        }
+    }
+
+    fun showStreamCredentialsDialog(onDismiss: (StreamCredentialsData?) -> Unit) {
+        val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_stream, null)
+
+        val streamKey = dialogView.findViewById<EditText>(R.id.streamkey)
+        val alsoRecord = dialogView.findViewById<CheckBox>(R.id.alsorecord)
+
+        val streamUrl = dialogView.findViewById<EditText>(R.id.streamurl).apply {
+            setOnEditorActionListener { _, actionId, _ ->
+                if (actionId == android.view.inputmethod.EditorInfo.IME_ACTION_NEXT) {
+                    streamKey.requestFocus()
+                    true
+                } else {
+                    false
+                }
+            }
+        }
+
+        streamUrl.setText(appSettings!!.getStringProperty(GlobalProperties.PropertiesString.STREAM_URL, ""))
+        streamKey.setText(appSettings!!.getPrivateStringProperty(GlobalProperties.PropertiesString.STREAM_KEY, ""))
+        alsoRecord.isChecked = appSettings!!.getBooleanProperty(GlobalProperties.PropertiesBoolean.STREAM_SAVE_TO_FILE, false)
+
+        val dialog = AlertDialog.Builder(this)
+            .setTitle(R.string.stream_enter_credentials)
+            .setView(dialogView)
+            .setPositiveButton(R.string.dialog_ok) { _, _ ->
+                val url = streamUrl.text?.toString().orEmpty().trim()
+                val key = streamKey.text?.toString().orEmpty().trim()
+                val recordtofile = alsoRecord.isChecked
+
+                if (url.isEmpty()) {
+                    onDismiss(null)
+                } else {
+                    appSettings!!.setStringProperty(GlobalProperties.PropertiesString.STREAM_URL, url)
+                    appSettings!!.setPrivateStringProperty(GlobalProperties.PropertiesString.STREAM_KEY, key)
+                    appSettings!!.setBooleanProperty(GlobalProperties.PropertiesBoolean.STREAM_SAVE_TO_FILE, recordtofile)
+                    saveStreamToFile = recordtofile
+                    onDismiss(StreamCredentialsData(url, key, recordtofile))
+                }
+            }
+            .setNegativeButton(R.string.dialog_cancel) { dialog, _ ->
+                dialog.cancel()
+                onDismiss(null)
+            }
+            .setOnCancelListener { onDismiss(null) }
+            .create()
+
+        dialog.show()
+
+        streamUrl.post {
+            streamUrl.requestFocus()
         }
     }
 

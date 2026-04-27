@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="24dp"
+    android:gravity="center">
+
+    <EditText
+        android:id="@+id/streamurl"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="@string/stream_enter_url"
+        android:inputType="textUri"
+        android:imeOptions="actionNext"
+        android:autofillHints="url" />
+
+    <EditText
+        android:id="@+id/streamkey"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="@string/stream_enter_key"
+        android:inputType="textPassword"
+        android:imeOptions="actionDone"
+        android:autofillHints="password" />
+
+    <CheckBox
+        android:id="@+id/alsorecord"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/stream_record_to_file"
+        android:layout_marginTop="12dp"
+        android:layout_centerHorizontal="true"/>
+
+</LinearLayout>

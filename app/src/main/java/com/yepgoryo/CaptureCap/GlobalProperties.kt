@@ -11,6 +11,8 @@ class GlobalProperties(context: Context) {
 
     private val propertiesList: SharedPreferences
     private val propertiesListEditor: SharedPreferences.Editor
+    private val privatePropertiesList: SharedPreferences
+    private val privatePropertiesListEditor: SharedPreferences.Editor
 
     enum class AudioChannelsProperty {
         MONO,
@@ -40,6 +42,8 @@ class GlobalProperties(context: Context) {
     enum class PropertiesBoolean {
         CHECK_SOUND_MIC,
         CHECK_SOUND_PLAYBACK,
+        CHECK_STREAM,
+        STREAM_SAVE_TO_FILE,
         RECORD_MODE,
         FLOATING_CONTROLS,
         PANEL_POSITION_VERTICAL_HIDDEN_BIG,
@@ -103,6 +107,8 @@ class GlobalProperties(context: Context) {
     enum class PropertiesString {
         FOLDER_PATH,
         FOLDER_AUDIO_PATH,
+        STREAM_URL,
+        STREAM_KEY,
         FPS_VALUE,
         BITRATE_VALUE,
         CODEC_VALUE,
@@ -123,6 +129,9 @@ class GlobalProperties(context: Context) {
         val sharedPreferences: SharedPreferences = context.getSharedPreferences(PREFERENCES_ALIAS, 0)
         this.propertiesList = sharedPreferences
         this.propertiesListEditor = sharedPreferences.edit()
+        val privateSharedPreferences: SharedPreferences = context.getSharedPreferences(PREFERENCES_ALIAS, Context.MODE_PRIVATE)
+        this.privatePropertiesList = privateSharedPreferences
+        this.privatePropertiesListEditor = privateSharedPreferences.edit()
     }
 
     private fun convertPropertyName(name: String): String {
@@ -223,17 +232,28 @@ class GlobalProperties(context: Context) {
         return string
     }
 
-    fun setStringProperty(propertiesString: PropertiesString, default: String) {
-        this.propertiesListEditor.putString(convertPropertyName(propertiesString.toString()), default)
+    fun setStringProperty(propertiesString: PropertiesString, value: String) {
+        this.propertiesListEditor.putString(convertPropertyName(propertiesString.toString()), value)
         this.propertiesListEditor.commit()
+    }
+
+    fun getPrivateStringProperty(propertiesString: PropertiesString, default: String): String {
+        val string: String = this.privatePropertiesList.getString(convertPropertyName(propertiesString.toString()), default) ?: ""
+        if (string == "") return default
+        return string
+    }
+
+    fun setPrivateStringProperty(propertiesString: PropertiesString, value: String) {
+        this.privatePropertiesListEditor.putString(convertPropertyName(propertiesString.toString()), value)
+        this.privatePropertiesListEditor.commit()
     }
 
     fun getBooleanProperty(propertiesBoolean: PropertiesBoolean, default: Boolean): Boolean {
         return this.propertiesList.getBoolean(convertPropertyName(propertiesBoolean.toString()), default)
     }
 
-    fun setBooleanProperty(propertiesBoolean: PropertiesBoolean, default: Boolean) {
-        this.propertiesListEditor.putBoolean(convertPropertyName(propertiesBoolean.toString()), default)
+    fun setBooleanProperty(propertiesBoolean: PropertiesBoolean, value: Boolean) {
+        this.propertiesListEditor.putBoolean(convertPropertyName(propertiesBoolean.toString()), value)
         this.propertiesListEditor.commit()
     }
 
@@ -241,8 +261,8 @@ class GlobalProperties(context: Context) {
         return this.propertiesList.getInt(convertPropertyName(propertiesInt.toString()), default)
     }
 
-    fun setIntProperty(propertiesInt: PropertiesInt, default: Int) {
-        this.propertiesListEditor.putInt(convertPropertyName(propertiesInt.toString()), default)
+    fun setIntProperty(propertiesInt: PropertiesInt, value: Int) {
+        this.propertiesListEditor.putInt(convertPropertyName(propertiesInt.toString()), value)
         this.propertiesListEditor.commit()
     }
 

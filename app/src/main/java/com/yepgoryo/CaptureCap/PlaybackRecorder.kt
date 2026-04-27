@@ -17,7 +17,6 @@ import android.util.Log
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import java.io.FileDescriptor
-import java.io.IOException
 import java.nio.ByteBuffer
 import java.util.ArrayList
 import java.util.LinkedList
@@ -28,6 +27,10 @@ class PlaybackRecorder(private var context: Context,
         private var virtualDisplay: VirtualDisplay?,
         private var fileDescriptor: FileDescriptor,
         private var mediaProjection: MediaProjection?,
+        private var enableStream: Boolean,
+        private var streamUrl: String?,
+        private var streamKey: String?,
+        private var saveStreamToFile: Boolean,
         private var customWidth: Int,
         private var customHeight: Int,
         private var scaleRatio: Float,
@@ -60,6 +63,7 @@ class PlaybackRecorder(private var context: Context,
     private var mCallback: Callback? = null
     private var mHandler: CallbackHandler? = null
     private var mMuxer: MediaMuxer? = null
+    private var sMuxer: RtmpMuxer? = null
     private var mVideoEncoder: VideoEncoder? = null
     private var mVideoPtsOffset: Long = 0L
     private var mWorker: HandlerThread? = null
@@ -75,6 +79,8 @@ class PlaybackRecorder(private var context: Context,
     private var doRestart: Boolean = false
     private var mVideoTrackIndex: Int = INVALID_INDEX
     private var mAudioTrackIndex: Int = INVALID_INDEX
+    private var sVideoTrackIndex: Int = INVALID_INDEX
+    private var sAudioTrackIndex: Int = INVALID_INDEX
     private var codecsTryIndex: Int = 0
     private var codecsTryFramerate: Int = 30
     private var lastPaused: Long = 0
@@ -91,6 +97,22 @@ class PlaybackRecorder(private var context: Context,
     private var codecsList: ArrayList<String> = ArrayList()
     private var codecsAudioList: ArrayList<String> = ArrayList()
     private var codecProfileLevels: ArrayList<MediaCodecInfo.CodecProfileLevel> = ArrayList()
+
+    private var fullStreamPath: String = ""
+
+    private var sps: ByteArray? = null
+    private var pps: ByteArray? = null
+    private var asc: ByteArray? = null
+
+    private var pollHandler: Handler? = null
+    private var pollRunnable: Runnable? = null
+    private var lastQueuedVideoBufferIndex: Int = MediaCodec.INFO_TRY_AGAIN_LATER
+    private var lastQueuedVideoPtsUs: Long = 0L
+    private var lastVideoOutputTimeNs: Long = 0L
+    private var videoEncoderStallTimer: Handler? = null
+    private var lastQueuedVideoData: ByteArray? = null
+
+    var recordingCallback: ScreenRecorder.RecordingFinishedCallback? = null
 
     interface Callback {
         fun onRecording(presentationTimeUs: Long)
@@ -128,6 +150,9 @@ class PlaybackRecorder(private var context: Context,
         }
         if (this.nativeFramerate <= 60) {
             this.try60FPS = false
+        }
+        if (enableStream) {
+            this.fullStreamPath = this.streamUrl + "/" + this.streamKey
         }
     }
 
@@ -276,16 +301,22 @@ class PlaybackRecorder(private var context: Context,
     }
 
     fun signalEndOfStream() {
-        Log.v("PlaybackRecorder", "Signal end of stream")
+        Log.v(TAG, "Signal end of stream")
         val bufferInfo: MediaCodec.BufferInfo = MediaCodec.BufferInfo()
         bufferInfo.set(0, 0, 0L, MediaCodec.BUFFER_FLAG_END_OF_STREAM)
         val byteBufferAllocate: ByteBuffer = ByteBuffer.allocate(0)
-        if (!this.recordOnlyAudio && this.mVideoTrackIndex != INVALID_INDEX) {
-            writeSampleData(this.mVideoTrackIndex, bufferInfo, byteBufferAllocate)
+        if (!this.recordOnlyAudio) {
+            if ((enableStream && this.sVideoTrackIndex != INVALID_INDEX) || this.mVideoTrackIndex != INVALID_INDEX) {
+                writeSampleData(true, bufferInfo, byteBufferAllocate)
+            }
         }
-        if (this.mAudioTrackIndex != INVALID_INDEX) {
-            writeSampleData(this.mAudioTrackIndex, bufferInfo, byteBufferAllocate)
+
+        if ((enableStream && this.sAudioTrackIndex != INVALID_INDEX) || this.mAudioTrackIndex != INVALID_INDEX) {
+            writeSampleData(false, bufferInfo, byteBufferAllocate)
         }
+
+        this.sVideoTrackIndex = INVALID_INDEX
+        this.sAudioTrackIndex = INVALID_INDEX
         this.mVideoTrackIndex = INVALID_INDEX
         this.mAudioTrackIndex = INVALID_INDEX
     }
@@ -297,7 +328,14 @@ class PlaybackRecorder(private var context: Context,
         }
         this.mIsRunning.set(true)
         try {
-            this.mMuxer = MediaMuxer(fileDescriptor, MediaMuxer.OutputFormat.MUXER_OUTPUT_MPEG_4)
+            if (enableStream) {
+                this.sMuxer = RtmpMuxer(context, fullStreamPath, customSampleRate, customChannelsCount)
+                if (saveStreamToFile) {
+                    this.mMuxer = MediaMuxer(fileDescriptor, MediaMuxer.OutputFormat.MUXER_OUTPUT_MPEG_4)
+                }
+            } else {
+                this.mMuxer = MediaMuxer(fileDescriptor, MediaMuxer.OutputFormat.MUXER_OUTPUT_MPEG_4)
+            }
             if (!this.recordOnlyAudio) {
                 prepareVideoEncoder()
             }
@@ -319,11 +357,12 @@ class PlaybackRecorder(private var context: Context,
                 if (!this.mIsPaused.get()) {
                     val outputBuffer: ByteBuffer = this.mVideoEncoder!!.getOutputBuffer(index)
                     bufferInfo.presentationTimeUs -= this.lastTimeout
-                    writeSampleData(this.mVideoTrackIndex, bufferInfo, outputBuffer)
+                    writeSampleData(true, bufferInfo, outputBuffer)
                 }
                 this.mVideoEncoder!!.releaseOutputBuffer(index)
                 if ((bufferInfo.flags and MediaCodec.BUFFER_FLAG_END_OF_STREAM) != 0) {
                     this.mVideoTrackIndex = INVALID_INDEX
+                    this.sVideoTrackIndex = INVALID_INDEX
                     signalStop(true)
                 }
             }
@@ -339,18 +378,19 @@ class PlaybackRecorder(private var context: Context,
                 if (!this.mIsPaused.get()) {
                     val outputBuffer: ByteBuffer = this.mAudioEncoder!!.getOutputBuffer(index)!!
                     bufferInfo.presentationTimeUs -= this.lastTimeout
-                    writeSampleData(this.mAudioTrackIndex, bufferInfo, outputBuffer)
+                    writeSampleData(false, bufferInfo, outputBuffer)
                 }
                 this.mAudioEncoder!!.releaseOutputBuffer(index)
                 if ((bufferInfo.flags and MediaCodec.BUFFER_FLAG_END_OF_STREAM) != 0) {
                     this.mAudioTrackIndex = INVALID_INDEX
+                    this.sAudioTrackIndex = INVALID_INDEX
                     signalStop(true)
                 }
             }
         }
     }
 
-    private fun writeSampleData(index: Int, bufferInfo: MediaCodec.BufferInfo, byteBuffer: ByteBuffer) {
+    private fun writeSampleData(isVideo: Boolean, bufferInfo: MediaCodec.BufferInfo, byteBuffer: ByteBuffer) {
         var byteBufferWrite: ByteBuffer? = byteBuffer
         var callback: Callback
         if ((bufferInfo.flags and MediaCodec.BUFFER_FLAG_CODEC_CONFIG) != 0) {
@@ -358,10 +398,18 @@ class PlaybackRecorder(private var context: Context,
         }
         if (bufferInfo.size != 0 || (bufferInfo.flags and MediaCodec.BUFFER_FLAG_END_OF_STREAM) != 0) {
             if (bufferInfo.presentationTimeUs != 0L) {
-                if (index == this.mVideoTrackIndex) {
-                    resetVideoPts(bufferInfo)
-                } else if (index == this.mAudioTrackIndex) {
-                    resetAudioPts(bufferInfo)
+                if (enableStream && !saveStreamToFile) {
+                    if (isVideo) {
+                        resetVideoPts(bufferInfo)
+                    } else {
+                        resetAudioPts(bufferInfo)
+                    }
+                } else {
+                    if (isVideo) {
+                        resetVideoPts(bufferInfo)
+                    } else {
+                        resetAudioPts(bufferInfo)
+                    }
                 }
             }
             if ((bufferInfo.flags and MediaCodec.BUFFER_FLAG_END_OF_STREAM) == 0 && this.mCallback != null) {
@@ -373,7 +421,26 @@ class PlaybackRecorder(private var context: Context,
         if (byteBufferWrite != null) {
             byteBufferWrite.position(bufferInfo.offset)
             byteBufferWrite.limit(bufferInfo.offset + bufferInfo.size)
-            this.mMuxer!!.writeSampleData(index, byteBufferWrite, bufferInfo)
+            try {
+                if (enableStream) {
+                    var trackIndex = if (isVideo) {
+                        sVideoTrackIndex
+                    } else {
+                        sAudioTrackIndex
+                    }
+                    this.sMuxer!!.writeSampleData(trackIndex, byteBufferWrite, bufferInfo)
+                }
+                if ((enableStream && saveStreamToFile) || !enableStream) {
+                    var trackIndex = if (isVideo) {
+                        mVideoTrackIndex
+                    } else {
+                        mAudioTrackIndex
+                    }
+                    this.mMuxer!!.writeSampleData(trackIndex, byteBufferWrite, bufferInfo)
+                }
+            } catch (exc: Exception) {
+                recordingCallback?.onError(exc)
+            }
         }
     }
 
@@ -420,14 +487,45 @@ class PlaybackRecorder(private var context: Context,
             return
         }
         if (!this.recordOnlyAudio) {
-            this.mVideoTrackIndex = this.mMuxer!!.addTrack(this.mVideoOutputFormat!!)
+            if (enableStream) {
+                this.sVideoTrackIndex = this.sMuxer!!.addTrack(this.mVideoOutputFormat!!)
+                if (saveStreamToFile) {
+                    this.mVideoTrackIndex = this.mMuxer!!.addTrack(this.mVideoOutputFormat!!)
+                }
+            } else {
+                this.mVideoTrackIndex = this.mMuxer!!.addTrack(this.mVideoOutputFormat!!)
+            }
         }
         this.mAudioTrackIndex = if (this.mAudioEncoder == null) {
             INVALID_INDEX
         } else {
-            this.mMuxer!!.addTrack(this.mAudioOutputFormat!!)
+            if (!enableStream || (enableStream && saveStreamToFile)) {
+                this.mMuxer!!.addTrack(this.mAudioOutputFormat!!)
+            } else {
+                INVALID_INDEX
+            }
         }
-        this.mMuxer!!.start()
+        this.sAudioTrackIndex = if (this.mAudioEncoder == null) {
+            INVALID_INDEX
+        } else {
+            if (enableStream) {
+                this.sMuxer!!.addTrack(this.mAudioOutputFormat!!)
+            } else {
+                INVALID_INDEX
+            }
+        }
+        if (enableStream) {
+            try {
+                this.sMuxer!!.start()
+                if (saveStreamToFile) {
+                    this.mMuxer!!.start()
+                }
+            } catch (exc: Exception) {
+                recordingCallback?.onError(exc)
+            }
+        } else {
+            this.mMuxer!!.start()
+        }
         this.mMuxerStarted = true
         if (this.mPendingVideoEncoderBufferIndices.isEmpty() && this.mPendingAudioEncoderBufferIndices.isEmpty()) {
             return
@@ -455,8 +553,72 @@ class PlaybackRecorder(private var context: Context,
         }
     }
 
+    fun extractByteArray(csdByteBuffer: ByteBuffer): ByteArray {
+        val buf = csdByteBuffer.duplicate()
+        val payload = ByteArray(buf.remaining())
+        buf.get(payload)
+        return payload.copyOf()
+    }
+
+    fun ByteArray.hex() = joinToString(" ") { "%02X".format(it) }
+
+    private fun startVideoStallTimer() {
+        pollHandler?.removeCallbacks(pollRunnable!!)
+        checkStallAndRefeed()
+    }
+
+    private fun checkStallAndRefeed() {
+        pollHandler = Handler(mWorker!!.looper)
+        pollRunnable = object : Runnable {
+            override fun run() {
+                if (!mIsRunning.get() || mMuxerStarted || mVideoEncoder == null) {
+                    return
+                }
+
+                val nowNs = System.nanoTime()
+                val timeoutNs = 1_000_000_000L
+
+                if (lastVideoOutputTimeNs != 0L && nowNs - lastVideoOutputTimeNs > timeoutNs) {
+                    if (lastQueuedVideoBufferIndex != MediaCodec.INFO_TRY_AGAIN_LATER && mVideoEncoder != null) {
+                        try {
+                            val inputIndex = mVideoEncoder!!.mEncoder?.dequeueInputBuffer(0)
+                            if (inputIndex!! >= 0) {
+                                val inputBuffer = mVideoEncoder!!.mEncoder?.getInputBuffer(inputIndex)
+                                val data = lastQueuedVideoData ?: return
+                                inputBuffer?.clear()
+                                inputBuffer?.put(data)
+                                inputBuffer?.flip()
+                                mVideoEncoder!!.queueInputBuffer(inputIndex,
+                                    0,
+                                    data.size,
+                                    lastQueuedVideoPtsUs,
+                                    0
+                                )
+                            }
+                        } catch (exc: Exception) {
+                            recordingCallback?.onError(exc)
+                        }
+                    }
+                }
+                pollHandler?.postDelayed({
+                    checkStallAndRefeed()
+                }, 1000)
+            }
+        }
+        pollHandler?.postDelayed({
+            checkStallAndRefeed()
+        }, 1000)
+    }
+
     private fun prepareVideoEncoder() {
         this.mVideoEncoder!!.setCallback(object: VideoEncoder.Callback() {
+            override fun onInputBufferAvailable(videoEncoder: VideoEncoder, index: Int) {
+                val inputBuffer = videoEncoder.getInputBuffer(index)
+                lastQueuedVideoData = ByteArray(inputBuffer.remaining())
+                inputBuffer.get(lastQueuedVideoData!!)
+                super.onInputBufferAvailable(videoEncoder, index)
+            }
+
             override fun onOutputBufferAvailable(videoEncoder: VideoEncoder, index: Int, bufferInfo: MediaCodec.BufferInfo) {
                 try {
                     this@PlaybackRecorder.muxVideo(index, bufferInfo)
@@ -470,11 +632,33 @@ class PlaybackRecorder(private var context: Context,
             }
 
             override fun onOutputFormatChanged(videoEncoder: VideoEncoder, mediaFormat: MediaFormat) {
+                val spsBuffer = mediaFormat.getByteBuffer("csd-0")
+                val ppsBuffer = mediaFormat.getByteBuffer("csd-1")
+
+                if (spsBuffer != null) {
+                    sps = extractByteArray(spsBuffer)
+                    Log.d(TAG, "SPS output format init: ${sps!!.hex()}")
+                } else {
+                    Log.e(TAG, "spsBuffer is null!")
+                }
+
+                if (ppsBuffer != null) {
+                    pps = extractByteArray(ppsBuffer)
+                    Log.d(TAG, "PPS output format init: ${pps!!.hex()}")
+                } else {
+                    Log.e(TAG, "ppsBuffer is null!")
+                }
+
+                if (enableStream && sps != null && pps != null) {
+                    this@PlaybackRecorder.sMuxer!!.setAVCConfig(sps!!, pps!!)
+                }
+
                 this@PlaybackRecorder.resetVideoOutputFormat(mediaFormat)
                 this@PlaybackRecorder.startMuxerIfReady()
             }
         })
         this.mVideoEncoder!!.prepare()
+        startVideoStallTimer()
     }
 
     private fun prepareAudioEncoder() {
@@ -491,6 +675,19 @@ class PlaybackRecorder(private var context: Context,
             }
 
             override fun onOutputFormatChanged(audioEncoder: AudioEncoder, mediaFormat: MediaFormat) {
+                val ascBuffer = mediaFormat.getByteBuffer("csd-0")
+
+                if (ascBuffer != null) {
+                    asc = extractByteArray(ascBuffer)
+                    Log.d(TAG, "ASC output format init: ${asc!!.hex()}")
+                } else {
+                    Log.e(TAG, "ascBuffer is null!")
+                }
+
+                if (enableStream && asc != null) {
+                    this@PlaybackRecorder.sMuxer!!.setAACConfig(asc!!)
+                }
+
                 this@PlaybackRecorder.resetAudioOutputFormat(mediaFormat)
                 this@PlaybackRecorder.startMuxerIfReady()
             }
@@ -508,6 +705,8 @@ class PlaybackRecorder(private var context: Context,
 
     fun stopEncoders() {
         this.mIsRunning.set(false)
+        videoEncoderStallTimer?.removeCallbacksAndMessages(null)
+        pollHandler?.removeCallbacks(pollRunnable!!)
         this.mPendingAudioEncoderBufferInfos.clear()
         this.mPendingAudioEncoderBufferIndices.clear()
         this.mPendingVideoEncoderBufferInfos.clear()
@@ -539,7 +738,7 @@ class PlaybackRecorder(private var context: Context,
         this.mAudioOutputFormat = null
         this.mVideoTrackIndex = INVALID_INDEX
         this.mAudioTrackIndex = INVALID_INDEX
-        this.mMuxerStarted = false
+
         if (this.mWorker != null) {
             this.mWorker?.quitSafely()
             this.mWorker = null
@@ -552,17 +751,41 @@ class PlaybackRecorder(private var context: Context,
             this.mAudioEncoder?.release()
             this.mAudioEncoder = null
         }
-        if (this.mMuxer != null) {
-            try {
-                if (this.mMuxerStarted) {
-                    this.mMuxer?.stop()
+        if (enableStream) {
+            if (this.sMuxer != null) {
+                try {
+                    this.sMuxer!!.stop()
+                    this.sMuxer!!.release()
+                } catch (exc: Exception) {
+                    throw exc
                 }
-                this.mMuxer?.release()
-            } catch (exc: Exception) {
-                throw exc
+                this.sMuxer = null
             }
-            this.mMuxer = null
+            if (this.mMuxer != null && saveStreamToFile) {
+                try {
+                    if (this.mMuxerStarted) {
+                        this.mMuxer?.stop()
+                        this.mMuxer?.release()
+                    }
+                } catch (exc: Exception) {
+                    throw exc
+                }
+                this.mMuxer = null
+            }
+        } else {
+            if (this.mMuxer != null) {
+                try {
+                    if (this.mMuxerStarted) {
+                        this.mMuxer?.stop()
+                        this.mMuxer?.release()
+                    }
+                } catch (exc: Exception) {
+                    throw exc
+                }
+                this.mMuxer = null
+            }
         }
+        this.mMuxerStarted = false
         this.mHandler = null
     }
 

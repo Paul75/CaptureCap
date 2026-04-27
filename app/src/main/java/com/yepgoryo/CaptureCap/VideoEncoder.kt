@@ -38,7 +38,7 @@ class VideoEncoder(customWidth: Int, customHeight: Int, scaleRatio: Float, nativ
         }
     }
 
-    private var mEncoder: MediaCodec? = null
+    var mEncoder: MediaCodec? = null
     private var mSurface: Surface? = null
     private var screenFramerate: Int = 0
     private var usedBitrate: Int = 0
@@ -73,7 +73,8 @@ class VideoEncoder(customWidth: Int, customHeight: Int, scaleRatio: Float, nativ
         mediaFormatCreateVideoFormat.setInteger(MediaFormat.KEY_COLOR_FORMAT, MediaCodecInfo.CodecCapabilities.COLOR_FormatSurface)
         mediaFormatCreateVideoFormat.setInteger(MediaFormat.KEY_BIT_RATE, this.usedBitrate)
         mediaFormatCreateVideoFormat.setInteger(MediaFormat.KEY_FRAME_RATE, this.screenFramerate)
-        mediaFormatCreateVideoFormat.setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, 5)
+        mediaFormatCreateVideoFormat.setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, 1)
+        mediaFormatCreateVideoFormat.setInteger("i-frame-interval", 1)
         if (this.codecProfileLevel != null) {
             if (this.codecProfileLevel!!.profile != 0 && this.codecProfileLevel!!.level != 0) {
                 mediaFormatCreateVideoFormat.setInteger(MediaFormat.KEY_PROFILE, this.codecProfileLevel!!.profile)

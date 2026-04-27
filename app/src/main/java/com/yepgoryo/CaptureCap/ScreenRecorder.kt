@@ -59,7 +59,8 @@ class ScreenRecorder : Service() {
         const val ACTION_STOP: String = MainActivity.appName + ".STOP_RECORDING"
         const val ACTION_ACTIVITY_CONNECT: String = MainActivity.appName + ".ACTIVITY_CONNECT"
         const val ACTION_ACTIVITY_DISCONNECT: String = MainActivity.appName + ".ACTIVITY_DISCONNECT"
-        const val ACTION_ACTIVITY_DELETE_FINISHED_FILE: String = MainActivity.appName + ".ACTIVITY_DELETE_FINISHED_FILE"
+        const val ACTION_ACTIVITY_DELETE_FINISHED_FILE: String =
+            MainActivity.appName + ".ACTIVITY_DELETE_FINISHED_FILE"
     }
 
     private val BPP: Float = 0.25f
@@ -117,6 +118,11 @@ class ScreenRecorder : Service() {
     private var gameAudioSource: Boolean = false
     private var unknownAudioSource: Boolean = false
     private var minimizeOnStart: Boolean = false
+    private var enableStream: Boolean = false
+    private var streamURL: String = ""
+    private var streamKey: String = ""
+    private var streamSave: Boolean = false
+
     private var errorDir: Boolean = false
     private var finishedFileIntent: Intent? = null
     private var shareFinishedFileIntent: Intent? = null
@@ -124,20 +130,29 @@ class ScreenRecorder : Service() {
     private var tileBinder: QuickTile.TileBinder? = null
     private var panelBinder: FloatingControls.PanelBinder? = null
 
-    private var sensorListener: SensorEventListener = object: SensorEventListener {
+    private var sensorListener: SensorEventListener = object : SensorEventListener {
         override fun onAccuracyChanged(sensor: Sensor, accuracy: Int) {}
 
-        @Throws(IllegalStateException::class, Resources.NotFoundException::class, IOException::class, NumberFormatException::class)
-        override fun onSensorChanged(sensorEvent: SensorEvent)  {
-            var onShake: GlobalProperties.OnShakeProperty = GlobalProperties(this@ScreenRecorder.baseContext).getOnShake()
+        @Throws(
+            IllegalStateException::class,
+            Resources.NotFoundException::class,
+            IOException::class,
+            NumberFormatException::class
+        )
+        override fun onSensorChanged(sensorEvent: SensorEvent) {
+            var onShake: GlobalProperties.OnShakeProperty =
+                GlobalProperties(this@ScreenRecorder.baseContext).getOnShake()
             if (sensorEvent.sensor.type == Sensor.TYPE_ACCELEROMETER) {
                 if (this@ScreenRecorder.appSettings != null && this@ScreenRecorder.isActive && onShake != GlobalProperties.OnShakeProperty.DO_NOTHING) {
                     var sensorGx: Float = sensorEvent.values[0]
                     var sensorGy: Float = sensorEvent.values[1]
                     var sensorGz: Float = sensorEvent.values[2]
-                    this@ScreenRecorder.lastShakeAcceleration = this@ScreenRecorder.currentShakeAcceleration
-                    this@ScreenRecorder.currentShakeAcceleration = sqrt(((sensorGx * sensorGx) + (sensorGy * sensorGy) + (sensorGz * sensorGz)).toDouble()).toFloat()
-                    this@ScreenRecorder.shakeAcceleration = (this@ScreenRecorder.shakeAcceleration * 0.9f) + (this@ScreenRecorder.currentShakeAcceleration - this@ScreenRecorder.lastShakeAcceleration)
+                    this@ScreenRecorder.lastShakeAcceleration =
+                        this@ScreenRecorder.currentShakeAcceleration
+                    this@ScreenRecorder.currentShakeAcceleration =
+                        sqrt(((sensorGx * sensorGx) + (sensorGy * sensorGy) + (sensorGz * sensorGz)).toDouble()).toFloat()
+                    this@ScreenRecorder.shakeAcceleration =
+                        (this@ScreenRecorder.shakeAcceleration * 0.9f) + (this@ScreenRecorder.currentShakeAcceleration - this@ScreenRecorder.lastShakeAcceleration)
                     if (this@ScreenRecorder.shakeAcceleration > 12.0f && this@ScreenRecorder.runningService) {
                         when (onShake) {
                             GlobalProperties.OnShakeProperty.PAUSE -> this@ScreenRecorder.screenRecordingPause()
@@ -150,7 +165,7 @@ class ScreenRecorder : Service() {
         }
     }
 
-    private var mPanelConnection: ServiceConnection = object: ServiceConnection {
+    private var mPanelConnection: ServiceConnection = object : ServiceConnection {
         override fun onServiceConnected(componentName: ComponentName, iBinder: IBinder) {
             this@ScreenRecorder.panelBinder = iBinder as FloatingControls.PanelBinder
             this@ScreenRecorder.panelBinder!!.setConnectPanel(RecordingPanelBinder())
@@ -251,7 +266,11 @@ class ScreenRecorder : Service() {
         }
 
         fun registerListener() {
-            this@ScreenRecorder.sensor!!.registerListener(this@ScreenRecorder.sensorListener, this@ScreenRecorder.sensor!!.getDefaultSensor(1), 2)
+            this@ScreenRecorder.sensor!!.registerListener(
+                this@ScreenRecorder.sensorListener,
+                this@ScreenRecorder.sensor!!.getDefaultSensor(1),
+                2
+            )
         }
 
         fun recordingPause() {
@@ -270,6 +289,20 @@ class ScreenRecorder : Service() {
     inner class VideoCropperBinder : Binder() {
         fun getFilePath(): Uri {
             return this@ScreenRecorder.finishedFileDocument!!
+        }
+    }
+
+    private var stoppedOnError = false
+
+    inner class RecordingFinishedCallback {
+        fun onError(error: Exception) {
+            if (!stoppedOnError) {
+                Toast.makeText(baseContext, error.message, Toast.LENGTH_SHORT).show()
+                stoppedOnError = true
+
+                screenRecordingStop()
+                stopSelf()
+            }
         }
     }
 
@@ -341,6 +374,10 @@ class ScreenRecorder : Service() {
         this.gameAudioSource = this.appSettings!!.getBooleanProperty(GlobalProperties.PropertiesBoolean.AUD_SOURCE_GAME, false)
         this.unknownAudioSource = this.appSettings!!.getBooleanProperty(GlobalProperties.PropertiesBoolean.AUD_SOURCE_UNKNOWN, false)
         this.minimizeOnStart = this.appSettings!!.getBooleanProperty(GlobalProperties.PropertiesBoolean.MINIMIZE_ON_START, false)
+        this.enableStream = this.appSettings!!.getBooleanProperty(GlobalProperties.PropertiesBoolean.CHECK_STREAM, false)
+        this.streamURL = this.appSettings!!.getStringProperty(GlobalProperties.PropertiesString.STREAM_URL, "")
+        this.streamKey = this.appSettings!!.getPrivateStringProperty(GlobalProperties.PropertiesString.STREAM_KEY, "")
+        this.streamSave = this.appSettings!!.getBooleanProperty(GlobalProperties.PropertiesBoolean.STREAM_SAVE_TO_FILE, false)
         this.intentFlag = Intent.FLAG_ACTIVITY_MULTIPLE_TASK
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             this.intentFlag = Intent.FLAG_ACTIVITY_CLEAR_TOP
@@ -477,6 +514,7 @@ class ScreenRecorder : Service() {
     }
 
     fun screenRecordingStart() {
+        stoppedOnError = false
         this.isStopped = false
         if (this.minimizeOnStart) {
             val homeIntent = Intent(Intent.ACTION_MAIN)
@@ -591,12 +629,32 @@ class ScreenRecorder : Service() {
             val pauseAction: NotificationCompat.Action.Builder = NotificationCompat.Action.Builder(iconPause, getString(R.string.notifications_pause), PendingIntent.getService(this, 0, pauseIntent, this.intentFlag))
             var recordingStartedBuilder: NotificationCompat.Builder = NotificationCompat.Builder(this, NOTIFICATIONS_RECORDING_CHANNEL)
             if (this.recordOnlyAudio) {
-                recordingStartedBuilder = recordingStartedBuilder.setContentTitle(getString(R.string.recording_audio_started_title)).setContentText(getString(R.string.recording_audio_started_text)).setTicker(getString(R.string.recording_audio_started_text))
+                if (enableStream) {
+                    recordingStartedBuilder =
+                        recordingStartedBuilder.setContentTitle(getString(R.string.streaming_audio_started_title))
+                            .setContentText(getString(R.string.streaming_audio_started_text))
+                            .setTicker(getString(R.string.streaming_audio_started_text))
+                } else {
+                    recordingStartedBuilder =
+                        recordingStartedBuilder.setContentTitle(getString(R.string.recording_audio_started_title))
+                            .setContentText(getString(R.string.recording_audio_started_text))
+                            .setTicker(getString(R.string.recording_audio_started_text))
+                }
             } else {
-                recordingStartedBuilder = recordingStartedBuilder.setContentTitle(getString(R.string.recording_started_title)).setContentText(getString(R.string.recording_started_text)).setTicker(getString(R.string.recording_started_text))
+                if (enableStream) {
+                    recordingStartedBuilder =
+                        recordingStartedBuilder.setContentTitle(getString(R.string.streaming_started_title))
+                            .setContentText(getString(R.string.streaming_started_text))
+                            .setTicker(getString(R.string.streaming_started_text))
+                } else {
+                    recordingStartedBuilder =
+                        recordingStartedBuilder.setContentTitle(getString(R.string.recording_started_title))
+                            .setContentText(getString(R.string.recording_started_text))
+                            .setTicker(getString(R.string.recording_started_text))
+                }
             }
             recordingStartedBuilder = recordingStartedBuilder.setSmallIcon(R.drawable.icon_record_status).setLargeIcon(BitmapFactory.decodeResource(resources, R.drawable.icon_record_color_action_normal)).setUsesChronometer(true).setWhen(System.currentTimeMillis() - (SystemClock.elapsedRealtime() - this.timeStart)).setOngoing(true).addAction(notificationStopBuilder.build()).setPriority(NotificationCompat.PRIORITY_LOW)
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && !enableStream) {
                 recordingStartedBuilder.addAction(pauseAction.build())
             }
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
@@ -740,8 +798,9 @@ class ScreenRecorder : Service() {
                 } catch (exc: Exception) {
                     recordingError()
                 }
-                val playbackRecorder = PlaybackRecorder(applicationContext, this.recordOnlyAudio, this.recordingVirtualDisplay, this.recordingFileDescriptor!!, this.recordingMediaProjection, width, height, scaleRatio, refreshRate, this.recordMicrophone, this.recordPlayback, customQuality, qualityScale, customFps, fpsValue, customBitrate, bitrateValue, !codec.contentEquals(resources.getString(R.string.codec_option_auto_value)), codec, !audioCodec.contentEquals(resources.getString(R.string.audio_codec_option_auto_value)), audioCodec, this.customSampleRate, this.customChannelsCount, this.mediaAudioSource, this.gameAudioSource, this.unknownAudioSource)
+                val playbackRecorder = PlaybackRecorder(applicationContext, this.recordOnlyAudio, this.recordingVirtualDisplay, this.recordingFileDescriptor!!, this.recordingMediaProjection, this.enableStream, this.streamURL, this.streamKey, this.streamSave,width, height, scaleRatio, refreshRate, this.recordMicrophone, this.recordPlayback, customQuality, qualityScale, customFps, fpsValue, customBitrate, bitrateValue, !codec.contentEquals(resources.getString(R.string.codec_option_auto_value)), codec, !audioCodec.contentEquals(resources.getString(R.string.audio_codec_option_auto_value)), audioCodec, this.customSampleRate, this.customChannelsCount, this.mediaAudioSource, this.gameAudioSource, this.unknownAudioSource)
                 this.recorderPlayback = playbackRecorder
+                this.recorderPlayback?.recordingCallback = RecordingFinishedCallback()
                 playbackRecorder.start()
             }
             this.isActive = true
@@ -815,13 +874,46 @@ class ScreenRecorder : Service() {
         }
         var finishedRecordingBuilder: NotificationCompat.Builder = NotificationCompat.Builder(this, NOTIFICATIONS_RECORDING_CHANNEL)
         if (this.recordOnlyAudio) {
-            finishedRecordingBuilder = finishedRecordingBuilder.setContentTitle(getString(R.string.recording_audio_finished_title)).setContentText(getString(R.string.recording_audio_finished_text))
+            if (enableStream) {
+                if (streamSave) {
+                    finishedRecordingBuilder =
+                        finishedRecordingBuilder.setContentTitle(getString(R.string.streaming_audio_finished_saved_title))
+                            .setContentText(getString(R.string.streaming_audio_finished_saved_text))
+                } else {
+                    finishedRecordingBuilder =
+                        finishedRecordingBuilder.setContentTitle(getString(R.string.streaming_audio_finished_title))
+                            .setContentText(getString(R.string.streaming_audio_finished_text))
+                }
+            } else {
+                finishedRecordingBuilder =
+                    finishedRecordingBuilder.setContentTitle(getString(R.string.recording_audio_finished_title))
+                        .setContentText(getString(R.string.recording_audio_finished_text))
+            }
         } else {
-            finishedRecordingBuilder = finishedRecordingBuilder.setContentTitle(getString(R.string.recording_finished_title)).setContentText(getString(R.string.recording_finished_text))
+            if (enableStream) {
+                if (streamSave) {
+                    finishedRecordingBuilder =
+                        finishedRecordingBuilder.setContentTitle(getString(R.string.streaming_finished_saved_title))
+                            .setContentText(getString(R.string.streaming_finished_saved_text))
+                } else {
+                    finishedRecordingBuilder =
+                        finishedRecordingBuilder.setContentTitle(getString(R.string.streaming_finished_title))
+                            .setContentText(getString(R.string.streaming_finished_text))
+                }
+            } else {
+                finishedRecordingBuilder =
+                    finishedRecordingBuilder.setContentTitle(getString(R.string.recording_finished_title))
+                        .setContentText(getString(R.string.recording_finished_text))
+            }
         }
         val notificationDelete: NotificationCompat.Builder = finishedRecordingBuilder.setContentIntent(activity).setSmallIcon(R.drawable.icon_record_finished_status).setLargeIcon(BitmapFactory.decodeResource(resources, R.drawable.icon_record_finished_color_action_normal)).addAction(notificationShareBuilder.build()).addAction(notificationDeleteBuilder.build()).setAutoCancel(true).setPriority(NotificationCompat.PRIORITY_LOW)
-        if (!this.dontNotifyOnFinish) {
+        val notificationStreamFinished: NotificationCompat.Builder = finishedRecordingBuilder.setContentIntent(activity).setSmallIcon(R.drawable.icon_record_finished_status).setLargeIcon(BitmapFactory.decodeResource(resources, R.drawable.icon_record_finished_color_action_normal)).setAutoCancel(true).setPriority(NotificationCompat.PRIORITY_LOW)
+        if (!this.dontNotifyOnFinish && (!enableStream || (enableStream && streamSave))) {
             this.recordingNotificationManager!!.notify(NotificationID.NOTIFICATION_RECORDING_FINISHED_ID.ordinal, notificationDelete.build())
+        } else {
+            if (enableStream) {
+                this.recordingNotificationManager!!.notify(NotificationID.NOTIFICATION_RECORDING_FINISHED_ID.ordinal, notificationStreamFinished.build())
+            }
         }
         if (this.recordingMediaProjection != null) {
             this.recordingMediaProjection?.stop()
@@ -888,7 +980,17 @@ class ScreenRecorder : Service() {
         val pauseIcon: IconCompat = IconCompat.createWithResource(this, R.drawable.icon_pause_color_action)
         val pauseIntent = Intent(this, ScreenRecorder::class.java)
         pauseIntent.setAction(ACTION_PAUSE)
-        this.recordingNotificationManager!!.notify(NotificationID.NOTIFICATION_RECORDING_ID.ordinal, NotificationCompat.Builder(this, NOTIFICATIONS_RECORDING_CHANNEL).setContentTitle(getString(R.string.recording_started_title)).setContentText(getString(R.string.recording_started_text)).setTicker(getString(R.string.recording_started_text)).setSmallIcon(R.drawable.icon_record_status).setLargeIcon(BitmapFactory.decodeResource(getResources(), R.drawable.icon_record_color_action_normal)).setUsesChronometer(true).setWhen(System.currentTimeMillis() - (SystemClock.elapsedRealtime() - this.timeStart)).setOngoing(true).addAction(builder.build()).addAction(NotificationCompat.Action.Builder(pauseIcon, getString(R.string.notifications_pause), PendingIntent.getService(this, 0, pauseIntent, this.intentFlag)).build()).setPriority(NotificationCompat.PRIORITY_LOW).build())
+        this.recordingNotificationManager!!.notify(NotificationID.NOTIFICATION_RECORDING_ID.ordinal,
+            NotificationCompat.Builder(this, NOTIFICATIONS_RECORDING_CHANNEL)
+                .setContentTitle(getString(R.string.recording_started_title))
+                .setContentText(getString(R.string.recording_started_text))
+                .setTicker(getString(R.string.recording_started_text))
+                .setSmallIcon(R.drawable.icon_record_status)
+                .setLargeIcon(BitmapFactory.decodeResource(getResources(), R.drawable.icon_record_color_action_normal))
+                .setUsesChronometer(true).setWhen(System.currentTimeMillis() - (SystemClock.elapsedRealtime() - this.timeStart))
+                .setOngoing(true)
+                .addAction(builder.build()).addAction(NotificationCompat.Action.Builder(pauseIcon, getString(R.string.notifications_pause), PendingIntent.getService(this, 0, pauseIntent, this.intentFlag)).build())
+                .setPriority(NotificationCompat.PRIORITY_LOW).build())
     }
 
     fun screenRecordingShare() {
