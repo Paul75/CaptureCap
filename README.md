@@ -1,7 +1,7 @@
 <img src="icons_vector/app_icon.svg" alt="CaptureCap Icon" width="200"/>
 
 # CaptureCap
-***Capture Android Screen and/or Audio.***
+***Capture and Stream Android Screen and/or Audio.***
 
 [<img src="https://f-droid.org/badge/get-it-on.png"
     alt="Get it on F-Droid"
