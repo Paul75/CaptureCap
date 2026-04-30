@@ -17,11 +17,7 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(android_openssl)
 include(${android_openssl_SOURCE_DIR}/android_openssl.cmake)
 
-FetchContent_Declare(
-  ZLIB
-  GIT_REPOSITORY https://github.com/madler/zlib.git
-  GIT_TAG        v1.3.2
-)
+find_package(ZLIB REQUIRED)
 
 FetchContent_Declare(
   librtmp
@@ -29,7 +25,7 @@ FetchContent_Declare(
   GIT_TAG        v2.6
 )
 
-FetchContent_MakeAvailable(ZLIB librtmp)
+FetchContent_MakeAvailable(librtmp)
 
 FetchContent_GetProperties(librtmp)
 set(LIBRTMP_SRC_DIR ${librtmp_SOURCE_DIR}/librtmp)
@@ -69,6 +65,10 @@ if (RTMP_BUILD_SHARED)
 else()
   add_library(rtmp STATIC ${LIBRTMP_SOURCES})
 endif()
+
+add_custom_command(TARGET rtmp POST_BUILD
+    COMMAND ${NDK_OBJCOPY} --remove-section=.comment $<TARGET_FILE:rtmp>
+)
 
 target_include_directories(rtmp
   PUBLIC
