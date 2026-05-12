@@ -7,7 +7,7 @@
     alt="Get it on F-Droid"
     height="80">](https://f-droid.org/packages/com.yepgoryo.CaptureCap)
 
-<img src="metadata/en-US/images/phoneScreenshots/1.jpg" alt="CaptureCap Screenshot 1" width="300"/> <img src="metadata/en-US/images/phoneScreenshots/2.jpg" alt="CaptureCap Screenshot 2" width="300"/>
+<img src="metadata/en-US/images/phoneScreenshots/1.jpg" alt="CaptureCap Screenshot 1" width="200"/> <img src="metadata/en-US/images/phoneScreenshots/2.jpg" alt="CaptureCap Screenshot 2" width="200"/> <img src="metadata/en-US/images/phoneScreenshots/3.jpg" alt="CaptureCap Screenshot 3" width="200"/>
 
 *Audio Playback recording requires Android 10 or later. No Root needed*
 
