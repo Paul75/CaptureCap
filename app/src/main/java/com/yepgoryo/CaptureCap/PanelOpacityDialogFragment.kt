@@ -40,12 +40,7 @@ class PanelOpacityDialogFragment : PreferenceDialogFragmentCompat() {
     public override fun onBindDialogView(view: View) {
         this.opacityScale = this.appSettings?.getIntProperty(GlobalProperties.PropertiesInt.FLOATING_CONTROLS_OPACITY, 9) ?: 0
         val opacityHandle: ImageView = view.findViewById(R.id.opacity_handle)
-        val darkTheme: GlobalProperties.DarkThemeProperty? = this.appSettings?.getDarkTheme(true)
-        if (((resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES && darkTheme == GlobalProperties.DarkThemeProperty.AUTOMATIC) || darkTheme == GlobalProperties.DarkThemeProperty.DARK) {
-            opacityHandle.setImageDrawable(context?.resources?.getDrawable(R.drawable.floatingpanel_shape, context?.theme))
-        } else {
-            opacityHandle.setImageDrawable(context?.resources?.getDrawable(R.drawable.floatingpanel_shape_dark, context?.theme))
-        }
+        opacityHandle.setImageDrawable(context?.resources?.getDrawable(R.drawable.floatingpanel_shape, context?.theme))
         val seekBar: SeekBar = view.findViewById(R.id.opacity_seek)
         updateHint(this.opacityScale, opacityHandle)
         seekBar.progress = this.opacityScale

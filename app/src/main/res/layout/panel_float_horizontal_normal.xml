@@ -1,0 +1,71 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="horizontal"
+    android:background="@drawable/floatingpanel_shape"
+    android:gravity="start"
+    android:id="@+id/panelwithbackground">
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:id="@+id/panelwrapped">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingStart="8dp"
+            android:paddingEnd="0dp"
+            android:gravity="center">
+
+            <ImageButton
+                android:id="@+id/recordpausebuttonfloating"
+                android:layout_height="wrap_content"
+                android:layout_width="wrap_content"
+                android:contentDescription="@string/record_pause"
+                android:background="@android:color/transparent"
+                android:src="@drawable/icon_record_pause" />
+
+            <ImageButton
+                android:id="@+id/recordresumebuttonfloating"
+                android:layout_height="wrap_content"
+                android:layout_width="wrap_content"
+                android:contentDescription="@string/record_resume"
+                android:background="@android:color/transparent"
+                android:src="@drawable/icon_record_resume"
+                android:visibility="gone" />
+
+            <ImageButton
+                android:id="@+id/recordstopbuttonfloating"
+                android:layout_height="wrap_content"
+                android:layout_width="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:contentDescription="@string/record_stop"
+                android:background="@android:color/transparent"
+                android:src="@drawable/icon_record_stop" />
+
+        </LinearLayout>
+
+        <Chronometer
+            android:id="@+id/timerrecordfloating"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:textSize="6pt"
+            android:textColor="?attr/colorOnPrimary"
+            android:gravity="center" />
+
+    </LinearLayout>
+
+    <ImageView
+        android:id="@+id/floatingpanelhandle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:contentDescription="@string/floating_controls_description_handle"
+        android:background="@drawable/floatingpanel_handle_shape"
+        android:src="@drawable/icon_record_resume"
+        android:padding="16dp" />
+
+</LinearLayout>

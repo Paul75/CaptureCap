@@ -8,20 +8,22 @@
 
     <ImageView
         android:id="@+id/floatingpanelhandle"
-        android:layout_width="match_parent"
-        android:layout_height="20dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:contentDescription="@string/floating_controls_description_handle"
-        android:src="@drawable/floatingpanel_shape" />
+        android:background="@drawable/floatingpanel_handle_shape"
+        android:src="@drawable/icon_record_resume"
+        android:padding="8dp" />
 
     <LinearLayout
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
         android:gravity="top"
         android:id="@+id/panelwrapped">
 
         <LinearLayout
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:gravity="center">
@@ -31,14 +33,16 @@
                 android:layout_height="wrap_content"
                 android:layout_width="wrap_content"
                 android:contentDescription="@string/record_pause"
-                android:src="@drawable/icon_pause_color_action_tiny" />
+                android:background="@android:color/transparent"
+                android:src="@drawable/icon_record_pause" />
 
             <ImageButton
                 android:id="@+id/recordresumebuttonfloating"
                 android:layout_height="wrap_content"
                 android:layout_width="wrap_content"
                 android:contentDescription="@string/record_resume"
-                android:src="@drawable/icon_record_continue_color_action_tiny"
+                android:background="@android:color/transparent"
+                android:src="@drawable/icon_record_resume"
                 android:visibility="gone" />
 
             <ImageButton
@@ -46,7 +50,8 @@
                 android:layout_height="wrap_content"
                 android:layout_width="wrap_content"
                 android:contentDescription="@string/record_stop"
-                android:src="@drawable/icon_stop_color_action_tiny" />
+                android:background="@android:color/transparent"
+                android:src="@drawable/icon_record_stop" />
 
         </LinearLayout>
 
@@ -55,6 +60,7 @@
             android:layout_height="wrap_content"
             android:layout_width="match_parent"
             android:textSize="4pt"
+            android:textColor="?attr/colorOnPrimary"
             android:paddingBottom="5dp"
             android:gravity="center" />
 

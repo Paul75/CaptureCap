@@ -3,13 +3,18 @@ package com.yepgoryo.CaptureCap
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.app.Service
+import android.app.UiModeManager
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
 import android.content.pm.ServiceInfo
+import android.content.res.Configuration
 import android.content.res.Resources
+import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.Canvas
+import android.graphics.drawable.Icon
 import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
@@ -31,6 +36,7 @@ import android.provider.DocumentsContract
 import android.provider.Settings
 import android.util.DisplayMetrics
 import android.util.Log
+import android.util.TypedValue
 import android.view.Display
 import android.view.Surface
 import android.view.WindowManager
@@ -463,6 +469,30 @@ class ScreenRecorder : Service() {
         screenRecordingStop()
     }
 
+    fun getBitmapDescriptor(id: Int): Bitmap {
+        var vectorDrawable = getDrawable(id)
+
+        val h = vectorDrawable!!.getIntrinsicHeight()
+        val w = vectorDrawable!!.getIntrinsicWidth()
+
+        vectorDrawable!!.setBounds(0, 0, w, h)
+
+        val bm = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888)
+        val canvas = Canvas(bm)
+        vectorDrawable!!.draw(canvas)
+
+        return bm
+    }
+
+    fun getModeNight(): Boolean {
+        val uiModeManager: UiModeManager = baseContext.getSystemService(Context.UI_MODE_SERVICE) as UiModeManager
+        val mode = uiModeManager.getNightMode()
+        if (mode == UiModeManager.MODE_NIGHT_YES) {
+            return true
+        }
+        return false
+    }
+
     private fun getScreenResolution(): Array<Int> {
         val dimensions: Array<Int> = arrayOf(0,0)
         if (((this.orientationOnStart == Surface.ROTATION_270 || this.orientationOnStart == Surface.ROTATION_90) && this.screenWidthNormal < this.screenHeightNormal) || (!(this.orientationOnStart == Surface.ROTATION_270 || this.orientationOnStart == Surface.ROTATION_90) && this.screenWidthNormal > this.screenHeightNormal)) {
@@ -616,14 +646,20 @@ class ScreenRecorder : Service() {
             this.recordFilePathParent = documentParentPath
             this.recordFileFullPath = fullFilePath
             this.timeStart = SystemClock.elapsedRealtime()
-    
-            val iconStop: IconCompat = IconCompat.createWithResource(this, R.drawable.icon_stop_color_action)
-    
+
+            var iconStop: IconCompat = IconCompat.createWithBitmap(getBitmapDescriptor(R.drawable.icon_stop_color_action))
+            if (getModeNight()) {
+                iconStop = IconCompat.createWithBitmap(getBitmapDescriptor(R.drawable.icon_stop_color_action_dark))
+            }
             val stopIntent: Intent = Intent(this, ScreenRecorder::class.java)
             stopIntent.setAction(ACTION_STOP)
-    
+
             val notificationStopBuilder: NotificationCompat.Action.Builder = NotificationCompat.Action.Builder(iconStop, getString(R.string.notifications_stop), PendingIntent.getService(this, 0, stopIntent, this.intentFlag))
-            val iconPause: IconCompat = IconCompat.createWithResource(this, R.drawable.icon_pause_color_action)
+            var iconPause: IconCompat = IconCompat.createWithBitmap(getBitmapDescriptor(R.drawable.icon_pause_color_action))
+            if (getModeNight()) {
+                iconPause = IconCompat.createWithBitmap(getBitmapDescriptor(R.drawable.icon_pause_color_action_dark))
+            }
+
             val pauseIntent: Intent = Intent(this, ScreenRecorder::class.java)
             pauseIntent.setAction(ACTION_PAUSE)
             val pauseAction: NotificationCompat.Action.Builder = NotificationCompat.Action.Builder(iconPause, getString(R.string.notifications_pause), PendingIntent.getService(this, 0, pauseIntent, this.intentFlag))
@@ -653,7 +689,11 @@ class ScreenRecorder : Service() {
                             .setTicker(getString(R.string.recording_started_text))
                 }
             }
-            recordingStartedBuilder = recordingStartedBuilder.setSmallIcon(R.drawable.icon_record_status).setLargeIcon(BitmapFactory.decodeResource(resources, R.drawable.icon_record_color_action_normal)).setUsesChronometer(true).setWhen(System.currentTimeMillis() - (SystemClock.elapsedRealtime() - this.timeStart)).setOngoing(true).addAction(notificationStopBuilder.build()).setPriority(NotificationCompat.PRIORITY_LOW)
+            var iconRecord = Icon.createWithBitmap(getBitmapDescriptor(R.drawable.icon_record_color_action_normal))
+            if (getModeNight()) {
+                iconRecord = Icon.createWithBitmap(getBitmapDescriptor(R.drawable.icon_record_color_action_normal_dark))
+            }
+            recordingStartedBuilder = recordingStartedBuilder.setSmallIcon(R.drawable.icon_record_status).setLargeIcon(iconRecord).setUsesChronometer(true).setWhen(System.currentTimeMillis() - (SystemClock.elapsedRealtime() - this.timeStart)).setOngoing(true).addAction(notificationStopBuilder.build()).setPriority(NotificationCompat.PRIORITY_LOW)
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && !enableStream) {
                 recordingStartedBuilder.addAction(pauseAction.build())
             }
@@ -665,10 +705,10 @@ class ScreenRecorder : Service() {
             if (this.activityBinder != null) {
                 this.activityBinder?.recordingStart(true)
             }
-    
+
             var width: Int
             var height: Int
-    
+
             if (this.orientationOnStart == Surface.ROTATION_270 || this.orientationOnStart == Surface.ROTATION_90) {
                 width = this.screenHeightNormal
                 height = this.screenWidthNormal
@@ -676,16 +716,16 @@ class ScreenRecorder : Service() {
                 width = this.screenWidthNormal
                 height = this.screenHeightNormal
             }
-    
+
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O_MR1) {
                 val screenResolution: Array<Int> = getScreenResolution()
                 width = screenResolution[0]
                 height = screenResolution[1]
             }
-    
+
             val resolution: GlobalProperties.ResolutionProperty = this.appSettings!!.getResolution()
             var scaleRatio: Float
-    
+
             if (resolution == GlobalProperties.ResolutionProperty.NATIVE) {
                 scaleRatio = 1.0f
             } else {
@@ -707,7 +747,7 @@ class ScreenRecorder : Service() {
                 }
                 scaleRatio = screenScale / screenHeight
             }
-    
+
             val mediaProjectionManager: MediaProjectionManager = getSystemService(MediaProjectionManager::class.java)
             val callback: MediaProjection.Callback = object: MediaProjection.Callback() {
                 override fun onStop() {
@@ -716,7 +756,7 @@ class ScreenRecorder : Service() {
                     }
                 }
             }
-    
+
             if (this.recordOnlyAudio && (!this.recordPlayback || Build.VERSION.SDK_INT < Build.VERSION_CODES.Q)) {
                 this.recordingMediaProjection = null
             } else {
@@ -724,11 +764,11 @@ class ScreenRecorder : Service() {
                 this.recordingMediaProjection = mediaProjection
                 mediaProjection!!.registerCallback(callback, null)
             }
-    
+
             if (!this.recordOnlyAudio) {
                 this.recordingVirtualDisplay = this.recordingMediaProjection!!.createVirtualDisplay("CaptureCap", width, height, screenDensity.toInt(), DisplayManager.VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR, null, null, null)
             }
-    
+
             var refreshRate: Int = this.display!!.refreshRate.toInt()
             val customQuality: Boolean = this.appSettings!!.getBooleanProperty(GlobalProperties.PropertiesBoolean.CUSTOM_QUALITY, false)
             val qualityScale: Float = (this.appSettings!!.getIntProperty(GlobalProperties.PropertiesInt.QUALITY_SCALE, 9) + 1) * 0.1f
@@ -738,7 +778,7 @@ class ScreenRecorder : Service() {
             val bitrateValue: Int = Integer.parseInt(this.appSettings!!.getStringProperty(GlobalProperties.PropertiesString.BITRATE_VALUE, "0"))
             val codec: String = this.appSettings!!.getStringProperty(GlobalProperties.PropertiesString.CODEC_VALUE, resources.getString(R.string.codec_option_auto_value))
             val audioCodec: String = this.appSettings!!.getStringProperty(GlobalProperties.PropertiesString.AUDIO_CODEC_VALUE, resources.getString(R.string.audio_codec_option_auto_value))
-    
+
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
                 val mediaRecorder = MediaRecorder()
                 this.recordingMediaRecorder = mediaRecorder
@@ -859,8 +899,15 @@ class ScreenRecorder : Service() {
         val activity: PendingIntent = PendingIntent.getActivity(this, 0, this.finishedFileIntent, this.intentFlag)
         val recordingDeleteIntent = Intent(this, ScreenRecorder::class.java)
         recordingDeleteIntent.setAction(ScreenRecorder.ACTION_ACTIVITY_DELETE_FINISHED_FILE)
-        val notificationDeleteBuilder: NotificationCompat.Action.Builder = NotificationCompat.Action.Builder(IconCompat.createWithResource(this, R.drawable.icon_record_delete_color_action), getString(R.string.notifications_delete), PendingIntent.getService(this, 0, recordingDeleteIntent, this.intentFlag))
-        val iconRecordShare: IconCompat = IconCompat.createWithResource(this, R.drawable.icon_record_share_color_action)
+        var iconRecordDelete: IconCompat = IconCompat.createWithBitmap(getBitmapDescriptor(R.drawable.icon_record_delete_color_action))
+        if (getModeNight()) {
+            iconRecordDelete = IconCompat.createWithBitmap(getBitmapDescriptor(R.drawable.icon_record_delete_color_action_dark))
+        }
+        val notificationDeleteBuilder: NotificationCompat.Action.Builder = NotificationCompat.Action.Builder(iconRecordDelete, getString(R.string.notifications_delete), PendingIntent.getService(this, 0, recordingDeleteIntent, this.intentFlag))
+        var iconRecordShare: IconCompat = IconCompat.createWithBitmap(getBitmapDescriptor(R.drawable.icon_record_share_color_action))
+        if (getModeNight()) {
+            iconRecordShare = IconCompat.createWithBitmap(getBitmapDescriptor(R.drawable.icon_record_share_color_action_dark))
+        }
         this.shareFinishedFileIntent = Intent(Intent.ACTION_SEND)
         if (this.finishedFullFileDocument != null) {
             this.shareFinishedFileIntent!!.setType(this.finishedDocumentMime)
@@ -906,8 +953,12 @@ class ScreenRecorder : Service() {
                         .setContentText(getString(R.string.recording_finished_text))
             }
         }
-        val notificationDelete: NotificationCompat.Builder = finishedRecordingBuilder.setContentIntent(activity).setSmallIcon(R.drawable.icon_record_finished_status).setLargeIcon(BitmapFactory.decodeResource(resources, R.drawable.icon_record_finished_color_action_normal)).addAction(notificationShareBuilder.build()).addAction(notificationDeleteBuilder.build()).setAutoCancel(true).setPriority(NotificationCompat.PRIORITY_LOW)
-        val notificationStreamFinished: NotificationCompat.Builder = finishedRecordingBuilder.setContentIntent(activity).setSmallIcon(R.drawable.icon_record_finished_status).setLargeIcon(BitmapFactory.decodeResource(resources, R.drawable.icon_record_finished_color_action_normal)).setAutoCancel(true).setPriority(NotificationCompat.PRIORITY_LOW)
+        var finishedIcon: Icon = Icon.createWithBitmap(getBitmapDescriptor(R.drawable.icon_record_finished_color_action_normal))
+        if (getModeNight()) {
+            finishedIcon = Icon.createWithBitmap(getBitmapDescriptor(R.drawable.icon_record_finished_color_action_normal_dark))
+        }
+        val notificationDelete: NotificationCompat.Builder = finishedRecordingBuilder.setContentIntent(activity).setSmallIcon(R.drawable.icon_record_finished_status).setLargeIcon(finishedIcon).addAction(notificationShareBuilder.build()).addAction(notificationDeleteBuilder.build()).setAutoCancel(true).setPriority(NotificationCompat.PRIORITY_LOW)
+        val notificationStreamFinished: NotificationCompat.Builder = finishedRecordingBuilder.setContentIntent(activity).setSmallIcon(R.drawable.icon_record_finished_status).setLargeIcon(finishedIcon).setAutoCancel(true).setPriority(NotificationCompat.PRIORITY_LOW)
         if (!this.dontNotifyOnFinish && (!enableStream || (enableStream && streamSave))) {
             this.recordingNotificationManager!!.notify(NotificationID.NOTIFICATION_RECORDING_FINISHED_ID.ordinal, notificationDelete.build())
         } else {
@@ -941,11 +992,17 @@ class ScreenRecorder : Service() {
         } else {
             this.recorderPlayback!!.pause()
         }
-        val stopIcon: IconCompat = IconCompat.createWithResource(this, R.drawable.icon_stop_continue_color_action)
+        var stopIcon: IconCompat = IconCompat.createWithBitmap(getBitmapDescriptor(R.drawable.icon_stop_continue_color_action))
+        if (getModeNight()) {
+            stopIcon = IconCompat.createWithBitmap(getBitmapDescriptor(R.drawable.icon_stop_continue_color_action_dark))
+        }
         val intent = Intent(this, ScreenRecorder::class.java)
         intent.setAction(ACTION_STOP)
         val stopNotificationAction: NotificationCompat.Action.Builder = NotificationCompat.Action.Builder(stopIcon, getString(R.string.notifications_stop), PendingIntent.getService(this, 0, intent, this.intentFlag))
-        val continueIcon: IconCompat = IconCompat.createWithResource(this, R.drawable.icon_record_continue_color_action)
+        var continueIcon: IconCompat = IconCompat.createWithBitmap(getBitmapDescriptor(R.drawable.icon_record_continue_color_action))
+        if (getModeNight()) {
+            continueIcon = IconCompat.createWithBitmap(getBitmapDescriptor(R.drawable.icon_record_continue_color_action_dark))
+        }
         val continueIntent = Intent(this, ScreenRecorder::class.java)
         continueIntent.setAction(ACTION_CONTINUE)
         val resumeNotificationAction: NotificationCompat.Action.Builder = NotificationCompat.Action.Builder(continueIcon, getString(R.string.notifications_resume), PendingIntent.getService(this, 0, continueIntent, this.intentFlag))
@@ -955,7 +1012,11 @@ class ScreenRecorder : Service() {
         } else {
             pauseNotificationBuilder = pauseNotificationBuilder.setContentTitle(getString(R.string.recording_paused_title)).setContentText(getString(R.string.recording_paused_text))
         }
-        this.recordingNotificationManager!!.notify(NotificationID.NOTIFICATION_RECORDING_ID.ordinal, pauseNotificationBuilder.setSmallIcon(R.drawable.icon_pause_status).setLargeIcon(BitmapFactory.decodeResource(getResources(), R.drawable.icon_pause_color_action_normal)).setOngoing(true).addAction(stopNotificationAction.build()).addAction(resumeNotificationAction.build()).setPriority(NotificationCompat.PRIORITY_LOW).build())
+        var iconPause = Icon.createWithBitmap(getBitmapDescriptor(R.drawable.icon_pause_color_action_normal))
+        if (getModeNight()) {
+            iconPause = Icon.createWithBitmap(getBitmapDescriptor(R.drawable.icon_pause_color_action_normal_dark))
+        }
+        this.recordingNotificationManager!!.notify(NotificationID.NOTIFICATION_RECORDING_ID.ordinal, pauseNotificationBuilder.setSmallIcon(R.drawable.icon_pause_status).setLargeIcon(iconPause).setOngoing(true).addAction(stopNotificationAction.build()).addAction(resumeNotificationAction.build()).setPriority(NotificationCompat.PRIORITY_LOW).build())
     }
 
     fun screenRecordingResume() {
@@ -973,11 +1034,21 @@ class ScreenRecorder : Service() {
         } else {
             this.recorderPlayback?.resume()
         }
-        val stopIcon: IconCompat = IconCompat.createWithResource(this, R.drawable.icon_stop_color_action)
+        var stopIcon: IconCompat = IconCompat.createWithBitmap(getBitmapDescriptor(R.drawable.icon_stop_color_action))
+        if (getModeNight()) {
+            stopIcon = IconCompat.createWithBitmap(getBitmapDescriptor(R.drawable.icon_stop_color_action_dark))
+        }
         val intent = Intent(this, ScreenRecorder::class.java)
         intent.setAction(ACTION_STOP)
         val builder: NotificationCompat.Action.Builder = NotificationCompat.Action.Builder(stopIcon, getString(R.string.notifications_stop), PendingIntent.getService(this, 0, intent, this.intentFlag))
-        val pauseIcon: IconCompat = IconCompat.createWithResource(this, R.drawable.icon_pause_color_action)
+        var pauseIcon: IconCompat = IconCompat.createWithBitmap(getBitmapDescriptor(R.drawable.icon_pause_color_action))
+        if (getModeNight()) {
+            pauseIcon = IconCompat.createWithBitmap(getBitmapDescriptor(R.drawable.icon_pause_color_action_dark))
+        }
+        var resumeIcon: Icon = Icon.createWithBitmap(getBitmapDescriptor(R.drawable.icon_record_color_action_normal))
+        if (getModeNight()) {
+            resumeIcon = Icon.createWithBitmap(getBitmapDescriptor(R.drawable.icon_record_color_action_normal_dark))
+        }
         val pauseIntent = Intent(this, ScreenRecorder::class.java)
         pauseIntent.setAction(ACTION_PAUSE)
         this.recordingNotificationManager!!.notify(NotificationID.NOTIFICATION_RECORDING_ID.ordinal,
@@ -986,7 +1057,7 @@ class ScreenRecorder : Service() {
                 .setContentText(getString(R.string.recording_started_text))
                 .setTicker(getString(R.string.recording_started_text))
                 .setSmallIcon(R.drawable.icon_record_status)
-                .setLargeIcon(BitmapFactory.decodeResource(getResources(), R.drawable.icon_record_color_action_normal))
+                .setLargeIcon(resumeIcon)
                 .setUsesChronometer(true).setWhen(System.currentTimeMillis() - (SystemClock.elapsedRealtime() - this.timeStart))
                 .setOngoing(true)
                 .addAction(builder.build()).addAction(NotificationCompat.Action.Builder(pauseIcon, getString(R.string.notifications_pause), PendingIntent.getService(this, 0, pauseIntent, this.intentFlag)).build())

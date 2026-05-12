@@ -33,18 +33,8 @@ class AppInfo : AppCompatActivity() {
 
         val darkTheme: GlobalProperties.DarkThemeProperty = this.appSettings!!.getDarkTheme(true)
 
-        if (((getResources().configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES && darkTheme == GlobalProperties.DarkThemeProperty.AUTOMATIC) || darkTheme == GlobalProperties.DarkThemeProperty.DARK) {
-            setTheme(R.style.Theme_CaptureCap_Dark)
-        } else {
-            setTheme(R.style.Theme_CaptureCap_Light)
-        }
-
         super.onCreate(bundle)
         setContentView(R.layout.about)
-
-        if (((getResources().configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES && darkTheme == GlobalProperties.DarkThemeProperty.AUTOMATIC) || darkTheme == GlobalProperties.DarkThemeProperty.DARK) {
-            findViewById<LinearLayout>(R.id.statusbar).setBackgroundColor(getColor(R.color.statusbar_dark))
-        }
 
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.VANILLA_ICE_CREAM) {
             findViewById<LinearLayout>(R.id.statusbar).visibility = View.GONE

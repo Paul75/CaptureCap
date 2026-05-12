@@ -134,11 +134,11 @@ class GlobalProperties(context: Context) {
         this.privatePropertiesListEditor = privateSharedPreferences.edit()
     }
 
-    private fun convertPropertyName(name: String): String {
+    fun convertPropertyName(name: String): String {
         return name.replace("_", "").lowercase(Locale.ROOT)
     }
 
-    private fun convertValueName(name: String): String  {
+    fun convertValueName(name: String): String  {
         val valueName: String = name.replace("_", " ").lowercase(Locale.ROOT)
         return valueName.replaceFirst(valueName.take(1), valueName.take(1).uppercase(Locale.ROOT))
     }

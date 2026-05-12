@@ -22,7 +22,7 @@ import java.util.ArrayList
 
 class RecordButton(context: Context, imageButton: ImageButton) {
     private var appSettings: GlobalProperties? = null
-    private var buttonUse: ImageButton? = null
+    var buttonUse: ImageButton? = null
     private var currentButtonState: ButtonState? = null
     private var mainButtonLayers: LayerDrawable? = null
     private var recordingBackgroundHover: AnimatedVectorDrawableCompat? = null

@@ -7,7 +7,7 @@
 
     <LinearLayout
         android:id="@+id/statusbar"
-        android:background="@color/statusbar"
+        android:background="?attr/statusBar"
         android:layout_width="match_parent"
         android:layout_height="1px"
         android:gravity="center_horizontal"
@@ -32,19 +32,18 @@
                 android:layout_height="wrap_content"
                 android:text="Bitcoin"
                 android:textSize="32sp"
-                android:textColor="?android:attr/textColorPrimary"
                 android:layout_marginTop="64dp"
                 android:layout_marginLeft="16dp"
                 android:layout_marginBottom="16dp"
                 android:layout_centerHorizontal="true" />
-    
+
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:gravity="center"
                 android:layout_centerHorizontal="true">
-        
+
                 <EditText
                     android:id="@+id/bitcoin_wallet"
                     android:layout_width="240dp"
@@ -53,43 +52,37 @@
                     android:editable="false"
                     android:textIsSelectable="true"
                     android:inputType="none"/>
-    
+
                 <Button
                     android:id="@+id/copy_bitcoin_wallet"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:paddingTop="10dp"
-                    android:paddingBottom="10dp"
-                    android:paddingLeft="20dp"
-                    android:paddingRight="20dp"
                     android:text="@string/donate_copy_wallet"
                     android:contentDescription="@string/donate_copy_wallet"
-                    android:background="@drawable/button_background"
-                    android:textColor="?android:attr/textColorPrimary"
+                    android:background="@drawable/bg_rounded_button"
                     android:textSize="12sp"
                     android:layout_centerVertical="true"
                     android:layout_centerHorizontal="true" />
-    
+
             </LinearLayout>
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Ethereum"
+                android:text="Ethereum/USDT"
                 android:textSize="32sp"
-                android:textColor="?android:attr/textColorPrimary"
                 android:layout_marginTop="64dp"
                 android:layout_marginLeft="16dp"
                 android:layout_marginBottom="16dp"
                 android:layout_centerHorizontal="true" />
-    
+
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:gravity="center"
                 android:layout_centerHorizontal="true">
-        
+
                 <EditText
                     android:id="@+id/ethereum_wallet"
                     android:layout_width="240dp"
@@ -98,23 +91,18 @@
                     android:editable="false"
                     android:textIsSelectable="true"
                     android:inputType="none"/>
-    
+
                 <Button
                     android:id="@+id/copy_ethereum_wallet"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:paddingTop="10dp"
-                    android:paddingBottom="10dp"
-                    android:paddingLeft="20dp"
-                    android:paddingRight="20dp"
                     android:text="@string/donate_copy_wallet"
                     android:contentDescription="@string/donate_copy_wallet"
-                    android:background="@drawable/button_background"
-                    android:textColor="?android:attr/textColorPrimary"
+                    android:background="@drawable/bg_rounded_button"
                     android:textSize="12sp"
                     android:layout_centerVertical="true"
                     android:layout_centerHorizontal="true" />
-    
+
             </LinearLayout>
 
             <TextView
@@ -122,12 +110,11 @@
                 android:layout_height="wrap_content"
                 android:text="Monero"
                 android:textSize="32sp"
-                android:textColor="?android:attr/textColorPrimary"
                 android:layout_marginTop="64dp"
                 android:layout_marginLeft="16dp"
                 android:layout_marginBottom="16dp"
                 android:layout_centerHorizontal="true" />
-    
+
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -135,7 +122,7 @@
                 android:gravity="center"
                 android:layout_marginBottom="64dp"
                 android:layout_centerHorizontal="true">
-        
+
                 <EditText
                     android:id="@+id/monero_wallet"
                     android:layout_width="240dp"
@@ -144,23 +131,18 @@
                     android:editable="false"
                     android:textIsSelectable="true"
                     android:inputType="none"/>
-    
+
                 <Button
                     android:id="@+id/copy_monero_wallet"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:paddingTop="10dp"
-                    android:paddingBottom="10dp"
-                    android:paddingLeft="20dp"
-                    android:paddingRight="20dp"
                     android:text="@string/donate_copy_wallet"
                     android:contentDescription="@string/donate_copy_wallet"
-                    android:background="@drawable/button_background"
-                    android:textColor="?android:attr/textColorPrimary"
+                    android:background="@drawable/bg_rounded_button"
                     android:textSize="12sp"
                     android:layout_centerVertical="true"
                     android:layout_centerHorizontal="true" />
-    
+
             </LinearLayout>
 
         </LinearLayout>

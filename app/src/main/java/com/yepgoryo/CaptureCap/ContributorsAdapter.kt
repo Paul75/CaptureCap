@@ -10,7 +10,10 @@ import androidx.core.net.toUri
 import androidx.recyclerview.widget.RecyclerView
 
 abstract class ContributorsAdapter(context: Context) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
-    private val contributorsLinks: Array<String> = context.resources.getStringArray(R.array.contributors_profiles)
+    private val contributorsGithubLinks: Array<String> = context.resources.getStringArray(R.array.contributors_profiles)
+    private val contributorsMastodonLinks: Array<String> = context.resources.getStringArray(R.array.contributors_mastodon_profiles)
+    private val contributorsTelegramLinks: Array<String> = context.resources.getStringArray(R.array.contributors_telegram_profiles)
+    private val contributorsEmails: Array<String> = context.resources.getStringArray(R.array.contributors_emails)
     private val contributorsNames: Array<String> = context.resources.getStringArray(R.array.contributors_names)
     private val contributorsRoles: Array<String> = context.resources.getStringArray(R.array.contributors_roles)
     private val mainContext: Context = context
@@ -19,19 +22,73 @@ abstract class ContributorsAdapter(context: Context) : RecyclerView.Adapter<Recy
         private val nameText: TextView = view.findViewById(R.id.contributor_name)
         private val roleText: TextView = view.findViewById(R.id.contributor_role)
 
-        init {
-            view.setOnClickListener(object : View.OnClickListener {
-                override fun onClick(view: View) {
-                    val link: String = this@ContributorsAdapter.contributorsLinks[this@ViewHolder.getAdapterPosition()]
-                    if (link.isEmpty()) {
-                        return
+        private val githubButton: TextView = view.findViewById(R.id.contributor_github)
+        private val mastodonButton: TextView = view.findViewById(R.id.contributor_mastodon)
+        private val telegramButton: TextView = view.findViewById(R.id.contributor_telegram)
+        private val emailButton: TextView = view.findViewById(R.id.contributor_email)
+
+        fun showGithubLink() {
+            if (contributorsGithubLinks.size > bindingAdapterPosition) {
+                val githubLink: String =
+                    this@ContributorsAdapter.contributorsGithubLinks[bindingAdapterPosition]
+                if (!githubLink.isEmpty()) {
+                    githubButton.visibility = View.VISIBLE
+                    githubButton.setOnClickListener {
+                        val intent = Intent(Intent.ACTION_VIEW)
+                        intent.setData(githubLink.toUri())
+                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                        this@ContributorsAdapter.mainContext.startActivity(intent)
                     }
-                    val intent = Intent(Intent.ACTION_VIEW)
-                    intent.setData(link.toUri())
-                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                    this@ContributorsAdapter.mainContext.startActivity(intent)
                 }
-            })
+            }
+        }
+
+        fun showMastodonLink() {
+            if (contributorsMastodonLinks.size > bindingAdapterPosition) {
+                val mastodonLink: String =
+                    this@ContributorsAdapter.contributorsMastodonLinks[bindingAdapterPosition]
+                if (!mastodonLink.isEmpty()) {
+                    mastodonButton.visibility = View.VISIBLE
+                    mastodonButton.setOnClickListener {
+                        val intent = Intent(Intent.ACTION_VIEW)
+                        intent.setData(mastodonLink.toUri())
+                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                        this@ContributorsAdapter.mainContext.startActivity(intent)
+                    }
+                }
+            }
+        }
+
+        fun showTelegramLink() {
+            if (contributorsTelegramLinks.size > bindingAdapterPosition) {
+                val telegramLink: String =
+                    this@ContributorsAdapter.contributorsTelegramLinks[bindingAdapterPosition]
+                if (!telegramLink.isEmpty()) {
+                    telegramButton.visibility = View.VISIBLE
+                    telegramButton.setOnClickListener {
+                        val intent = Intent(Intent.ACTION_VIEW)
+                        intent.setData(telegramLink.toUri())
+                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                        this@ContributorsAdapter.mainContext.startActivity(intent)
+                    }
+                }
+            }
+        }
+
+        fun showEmailLink() {
+            if (contributorsEmails.size > bindingAdapterPosition) {
+                val email: String = this@ContributorsAdapter.contributorsEmails[bindingAdapterPosition]
+                if (!email.isEmpty()) {
+                    emailButton.visibility = View.VISIBLE
+                    emailButton.setOnClickListener {
+                        val emailMailto = "mailto:$email"
+                        val intent = Intent(Intent.ACTION_VIEW)
+                        intent.setData(emailMailto.toUri())
+                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                        this@ContributorsAdapter.mainContext.startActivity(intent)
+                    }
+                }
+            }
         }
 
         fun getNameText(): TextView {
@@ -50,6 +107,10 @@ abstract class ContributorsAdapter(context: Context) : RecyclerView.Adapter<Recy
     override fun onBindViewHolder(viewHolder: RecyclerView.ViewHolder, position: Int) {
         (viewHolder as ViewHolder).getNameText().text = this.contributorsNames[position]
         viewHolder.getRoleText().text = this.contributorsRoles[position]
+        viewHolder.showGithubLink()
+        viewHolder.showMastodonLink()
+        viewHolder.showTelegramLink()
+        viewHolder.showEmailLink()
     }
 
     override fun getItemCount(): Int {

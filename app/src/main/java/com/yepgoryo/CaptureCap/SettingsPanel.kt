@@ -54,18 +54,9 @@ class SettingsPanel : AppCompatActivity(), PreferenceFragmentCompat.OnPreference
     override fun onCreate(bundle: Bundle?) {
         val globalProperties = GlobalProperties(baseContext)
         this.appSettings = globalProperties
-        val darkTheme: GlobalProperties.DarkThemeProperty = globalProperties.getDarkTheme(true)
-        if (((getResources().configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES && darkTheme == GlobalProperties.DarkThemeProperty.AUTOMATIC) || darkTheme == GlobalProperties.DarkThemeProperty.DARK) {
-            setTheme(R.style.Theme_CaptureCap_Dark)
-        } else {
-            setTheme(R.style.Theme_CaptureCap_Light)
-        }
         super.onCreate(bundle)
 
         setContentView(R.layout.settings_panel)
-        if (((getResources().configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES && darkTheme == GlobalProperties.DarkThemeProperty.AUTOMATIC) || darkTheme == GlobalProperties.DarkThemeProperty.DARK) {
-            findViewById<LinearLayout>(R.id.statusbar).setBackgroundColor(getColor(R.color.statusbar_dark))
-        }
 
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.VANILLA_ICE_CREAM) {
             findViewById<LinearLayout>(R.id.statusbar).visibility = View.GONE
@@ -169,9 +160,32 @@ class SettingsPanel : AppCompatActivity(), PreferenceFragmentCompat.OnPreference
                 true
             }
         this.settingsPanel?.findPreference<ListPreference>("darktheme")?.onPreferenceChangeListener = Preference.OnPreferenceChangeListener { preference, obj ->
-                Toast.makeText(this@SettingsPanel, R.string.dark_theme_change_notice, Toast.LENGTH_SHORT).show()
-                true
-            }
+            val mode = obj as String
+
+            resources.getStringArray(R.array.dark_theme_option_preferences_values)
+                .forEachIndexed { index, string ->
+                    if (string == mode) {
+                        when (index) {
+                            0 -> {
+                                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
+                            }
+                            1 -> {
+                                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
+                            }
+                            2 -> {
+                                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
+                            }
+                        }
+                    }
+                }
+
+            Toast.makeText(
+                this@SettingsPanel,
+                R.string.dark_theme_change_notice,
+                Toast.LENGTH_SHORT
+            ).show()
+            true
+        }
     }
 
     private fun getRealPath(path: String): String {

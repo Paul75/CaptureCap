@@ -2,8 +2,6 @@ package com.yepgoryo.CaptureCap
 
 import android.Manifest
 import android.animation.ObjectAnimator
-import android.animation.ValueAnimator
-import android.app.AlertDialog
 import android.content.ComponentName
 import android.content.Intent
 import android.content.ServiceConnection
@@ -18,28 +16,35 @@ import android.os.Build
 import android.os.Bundle
 import android.os.IBinder
 import android.os.SystemClock
+import android.provider.Settings
 import android.util.DisplayMetrics
 import android.view.Display
+import android.view.LayoutInflater
 import android.view.Surface
 import android.view.View
+import android.widget.Button
+import android.widget.CheckBox
 import android.widget.Chronometer
+import android.widget.EditText
+import android.widget.FrameLayout
 import android.widget.ImageButton
+import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.RelativeLayout
+import android.widget.RelativeLayout.LayoutParams
 import android.widget.TextView
 import android.widget.Toast
-import android.provider.Settings
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.appcompat.widget.TooltipCompat
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.isVisible
 import androidx.core.view.updatePadding
-import androidx.vectordrawable.graphics.drawable.VectorDrawableCompat
-import android.view.LayoutInflater
-import android.widget.CheckBox
-import android.widget.EditText
 
 class MainActivity : AppCompatActivity() {
 
@@ -53,49 +58,46 @@ class MainActivity : AppCompatActivity() {
     var audioPlaybackUnavailable: TextView? = null
     private var dialog: AlertDialog? = null
     private var display: Display? = null
-    var finishedPanel: LinearLayout? = null
+    var postRecordingPanel: LinearLayout? = null
     var mainRecordingButton: RecordButton? = null
-    var modesPanel: LinearLayout? = null
-    var optionsPanel: LinearLayout? = null
-    var recordAudioSetting: ImageButton? = null
-    var recordStreamSetting: ImageButton? = null
-    var recordDelete: ImageButton? = null
-    private var recordDeleteIcon: VectorDrawableCompat? = null
+    var captureStartButton: Button? = null
+    var recordOptionsPanel: LinearLayout? = null
+    var recordControls: LinearLayout? = null
+    var recordControlPause: Button? = null
+    var recordControlResume: Button? = null
+    var recordControlStop: Button? = null
+    var optionsPanel: FrameLayout? = null
 
-    var recordCrop: ImageButton? = null
 
-    private var recordCropIcon: VectorDrawableCompat? = null
     var recordInfo: ImageButton? = null
-    private var recordInfoIcon: VectorDrawableCompat? = null
-    var recordMicrophoneSetting: ImageButton? = null
-    private var recordMicrophoneState: VectorDrawableCompat? = null
-    private var recordMicrophoneStateDisabled: VectorDrawableCompat? = null
     private var recordModeChosen: Boolean = false
-    var recordOpen: ImageButton? = null
-    private var recordOpenIcon: VectorDrawableCompat? = null
-    private var recordPlaybackState: VectorDrawableCompat? = null
-    private var recordPlaybackStateDisabled: VectorDrawableCompat? = null
-    private var recordStreamState: VectorDrawableCompat? = null
-    private var recordStreamStateDisabled: VectorDrawableCompat? = null
-    var recordScreenSetting: ImageButton? = null
-    private var recordScreenState: VectorDrawableCompat? = null
-    private var recordScreenStateDisabled: VectorDrawableCompat? = null
     var recordSettings: ImageButton? = null
-    private var recordSettingsIcon: VectorDrawableCompat? = null
-    var recordShare: ImageButton? = null
-    private var recordShareIcon: VectorDrawableCompat? = null
-    var recordStop: ImageButton? = null
-    private var recordStopIcon: VectorDrawableCompat? = null
+
+    var postRecordShare: Button? = null
+    var postRecordDelete: Button? = null
+    var postRecordOpen: Button? = null
+    var postRecordCrop: Button? = null
+    var postRecordBack: Button? = null
+
+
     private var recordingBinder: ScreenRecorder.RecordingBinder? = null
     private var serviceIntent: Intent? = null
-    var startRecordingButton: ImageButton? = null
     var timeCounter: Chronometer? = null
+    var recordStatusMessage: TextView? = null
     var timerPanel: LinearLayout? = null
+    var captureOptionStream: ImageView? = null
+    var captureOptionRecord: ImageView? = null
+    var captureOptionScreen: ImageView? = null
+    var captureOptionMicrophone: ImageView? = null
+    var captureOptionAudio: ImageView? = null
+    var captureModeMenu: LinearLayout? = null
+    var recordOptionScreen: RecordSettingButton? = null
+    var recordOptionSound: RecordSettingButton? = null
+    var recordOptionMicrophone: RecordSettingButton? = null
     private var recordingState: ActionState = ActionState.RECORDING_STOPPED
     private var screenRecorderStarted: Boolean = false
     private var stateActivated: Boolean = false
     private var serviceToRecording: Boolean = false
-    private var isRecording: Boolean = false
     private var recordMicrophone: Boolean = false
     private var recordPlayback: Boolean = false
     private var recordStream: Boolean = false
@@ -164,16 +166,10 @@ class MainActivity : AppCompatActivity() {
         if (starting) {
             this.timeCounter!!.scaleX = 0.0f
             this.timeCounter!!.scaleY = 0.0f
-            this.timerPanel!!.visibility = View.VISIBLE
+            timeCounter!!.visibility = View.VISIBLE
+            this@MainActivity.mainRecordingButton!!.setButtonState(buttonState)
             val animateCounterX: ObjectAnimator = ObjectAnimator.ofFloat(this.timeCounter, "scaleX", 0.0f, 1.0f)
             val animateCounterY: ObjectAnimator = ObjectAnimator.ofFloat(this.timeCounter, "scaleY", 0.0f, 1.0f)
-            animateCounterX.addUpdateListener(object: ValueAnimator.AnimatorUpdateListener {
-                override fun onAnimationUpdate(valueAnimator: ValueAnimator) {
-                    if ((valueAnimator.getAnimatedValue() as Float) == 1.0f && buttonState != null) {
-                        this@MainActivity.mainRecordingButton!!.transitionToButtonState(buttonState)
-                    }
-                }
-            })
             animateCounterX.setDuration(400L)
             animateCounterY.setDuration(400L)
             animateCounterX.start()
@@ -181,15 +177,13 @@ class MainActivity : AppCompatActivity() {
         } else {
             this.timeCounter!!.scaleX = 1.0f
             this.timeCounter!!.scaleY = 1.0f
-            this.timerPanel!!.visibility = View.VISIBLE
+            timeCounter!!.visibility = View.VISIBLE
             val animateCounterX: ObjectAnimator = ObjectAnimator.ofFloat(this.timeCounter, "scaleX", 1.0f, 0.0f)
             val animateCounterY: ObjectAnimator = ObjectAnimator.ofFloat(this.timeCounter, "scaleY", 1.0f, 0.0f)
             animateCounterX.addUpdateListener { valueAnimator ->
                 if ((valueAnimator.getAnimatedValue() as Float) == 0.0f) {
-                    this@MainActivity.timerPanel!!.visibility = View.GONE
-                    if (buttonState != null) {
-                        this@MainActivity.mainRecordingButton!!.transitionToButtonState(buttonState)
-                    }
+                    timeCounter!!.visibility = View.GONE
+                    this@MainActivity.mainRecordingButton!!.transitionToButtonState(buttonState)
                 }
             }
             animateCounterX.setDuration(400L)
@@ -203,6 +197,14 @@ class MainActivity : AppCompatActivity() {
         if (this.mainRecordingButton != null) {
             this.mainRecordingButton?.updateConditions(this.recordMicrophone, this.recordPlayback, this.recordOnlyAudio)
         }
+    }
+
+    private fun updateCaptureOptionsIcons() {
+        captureOptionStream?.isVisible = this.recordStream
+        captureOptionRecord?.isVisible = !this.recordStream
+        captureOptionScreen?.isVisible = !this.recordOnlyAudio
+        captureOptionAudio?.isVisible = this.recordPlayback
+        captureOptionMicrophone?.isVisible = this.recordMicrophone
     }
 
     private fun updateRecordModeData() {
@@ -227,18 +229,43 @@ class MainActivity : AppCompatActivity() {
                 this@MainActivity.timeCounter!!.setBase(this@MainActivity.recordingBinder!!.getTimeStart())
                 this@MainActivity.timeCounter!!.start()
                 this@MainActivity.audioPlaybackUnavailable!!.visibility = View.GONE
-                this@MainActivity.modesPanel!!.visibility = View.GONE
+                recordControls!!.visibility = View.VISIBLE
+                if (recordStream) {
+                    recordControlPause!!.isVisible = false
+                    recordControlResume!!.isVisible = false
+                } else {
+                    recordControlPause!!.isVisible = true
+                    recordControlResume!!.isVisible = false
+                }
+                recordStatusMessage!!.visibility = View.VISIBLE
+                recordOptionsFullPanel!!.visibility = View.GONE
                 this@MainActivity.optionsPanel!!.visibility = View.GONE
                 this@MainActivity.recordingState = ActionState.RECORDING_IN_PROGRESS
+                captureStartButton!!.isVisible = false
+                mainRecordingButton!!.innerButton().isVisible = true
+                recordOptionsFullPanel!!.isVisible = false
+                if (recordStream) {
+                    if (recordOnlyAudio) {
+                        recordStatusMessage!!.setText(R.string.streaming_audio_started_text)
+                    } else {
+                        recordStatusMessage!!.setText(R.string.streaming_started_text)
+                    }
+                } else {
+                    if (recordOnlyAudio) {
+                        recordStatusMessage!!.setText(R.string.recording_audio_started_text)
+                    } else {
+                        recordStatusMessage!!.setText(R.string.recording_started_text)
+                    }
+                }
                 if (stateToRestore) {
                     this@MainActivity.showCounter(
                         true,
-                        RecordButton.ButtonState.TRANSITION_TO_RECORDING
+                        RecordButton.ButtonState.WHILE_RECORDING_NORMAL
                     )
                 } else {
                     this@MainActivity.timeCounter!!.scaleX = 1.0f
                     this@MainActivity.timeCounter!!.scaleY = 1.0f
-                    this@MainActivity.timerPanel!!.visibility = View.VISIBLE
+                    timeCounter!!.visibility = View.VISIBLE
                     this@MainActivity.mainRecordingButton!!.transitionToButtonState(RecordButton.ButtonState.WHILE_RECORDING_NORMAL)
                 }
             }
@@ -249,13 +276,29 @@ class MainActivity : AppCompatActivity() {
                 this@MainActivity.timeCounter!!.stop()
                 this@MainActivity.timeCounter!!.setBase(SystemClock.elapsedRealtime())
                 this@MainActivity.audioPlaybackUnavailable!!.visibility = View.GONE
-                this@MainActivity.modesPanel!!.visibility = View.GONE
-                this@MainActivity.optionsPanel!!.visibility = View.GONE
-                this@MainActivity.finishedPanel!!.visibility = View.VISIBLE
-                if (recordStream && !saveStreamToFile) {
-                    this@MainActivity.finishedPanel!!.visibility = View.GONE
+                if (recordStream) {
+                    if (recordOnlyAudio) {
+                        recordStatusMessage!!.setText(R.string.streaming_audio_finished_text)
+                    } else {
+                        recordStatusMessage!!.setText(R.string.streaming_finished_text)
+                    }
+                } else {
+                    if (recordOnlyAudio) {
+                        recordStatusMessage!!.setText(R.string.recording_audio_finished_text)
+                    } else {
+                        recordStatusMessage!!.setText(R.string.recording_finished_text)
+                    }
                 }
-                this@MainActivity.recordStop!!.setVisibility(View.GONE)
+                recordControls!!.visibility = View.GONE
+                recordOptionsFullPanel!!.visibility = View.GONE
+                this@MainActivity.optionsPanel!!.visibility = View.GONE
+                postRecordingPanel!!.visibility = View.VISIBLE
+                captureStartButton!!.visibility = View.GONE
+                mainRecordingButton!!.innerButton().visibility = View.VISIBLE
+                recordStatusMessage!!.visibility = View.VISIBLE
+                if (recordStream && !saveStreamToFile) {
+                    postRecordingPanel!!.visibility = View.GONE
+                }
                 if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
                     this@MainActivity.audioPlaybackUnavailable!!.visibility = View.VISIBLE
                 }
@@ -266,7 +309,7 @@ class MainActivity : AppCompatActivity() {
                         RecordButton.ButtonState.TRANSITION_TO_RECORDING_END
                     )
                 } else {
-                    this@MainActivity.timerPanel!!.visibility = View.GONE
+                    timeCounter!!.visibility = View.GONE
                     this@MainActivity.mainRecordingButton!!.transitionToButtonState(RecordButton.ButtonState.ENDED_RECORDING_NORMAL)
                     this@MainActivity.recordingState = ActionState.RECORDING_ENDED
                 }
@@ -277,13 +320,25 @@ class MainActivity : AppCompatActivity() {
             runOnUiThread {
                 this@MainActivity.timeCounter!!.setBase(SystemClock.elapsedRealtime() - j)
                 this@MainActivity.timeCounter!!.stop()
-                this@MainActivity.modesPanel!!.visibility = View.GONE
+                recordOptionsFullPanel!!.visibility = View.GONE
                 this@MainActivity.optionsPanel!!.visibility = View.GONE
                 this@MainActivity.timeCounter!!.scaleX = 1.0f
                 this@MainActivity.timeCounter!!.scaleY = 1.0f
-                this@MainActivity.timerPanel!!.visibility = View.VISIBLE
-                this@MainActivity.recordStop!!.setVisibility(View.VISIBLE)
+                timeCounter!!.visibility = View.VISIBLE
+                captureStartButton!!.visibility = View.GONE
+                mainRecordingButton!!.innerButton().visibility = View.VISIBLE
+                recordStatusMessage!!.visibility = View.VISIBLE
+                recordControls!!.visibility = View.VISIBLE
+                recordControlPause!!.visibility = View.GONE
+                recordControlResume!!.visibility = View.VISIBLE
                 this@MainActivity.recordingState = ActionState.RECORDING_PAUSED
+                if (!recordStream) {
+                    if (recordOnlyAudio) {
+                        recordStatusMessage!!.setText(R.string.recording_audio_paused_text)
+                    } else {
+                        recordStatusMessage!!.setText(R.string.recording_paused_text)
+                    }
+                }
                 if (stateToRestore) {
                     this@MainActivity.mainRecordingButton!!.transitionToButtonState(RecordButton.ButtonState.TRANSITION_TO_RECORDING_PAUSE)
                 } else {
@@ -297,21 +352,37 @@ class MainActivity : AppCompatActivity() {
             runOnUiThread {
                 this@MainActivity.timeCounter!!.setBase(time)
                 this@MainActivity.timeCounter!!.start()
-                this@MainActivity.recordStop!!.setVisibility(View.GONE)
 
+                if (recordStream) {
+                    if (recordOnlyAudio) {
+                        recordStatusMessage!!.setText(R.string.streaming_audio_started_text)
+                    } else {
+                        recordStatusMessage!!.setText(R.string.streaming_started_text)
+                    }
+                } else {
+                    if (recordOnlyAudio) {
+                        recordStatusMessage!!.setText(R.string.recording_audio_started_text)
+                    } else {
+                        recordStatusMessage!!.setText(R.string.recording_started_text)
+                    }
+                }
+                recordControlPause!!.visibility = View.VISIBLE
+                recordControlResume!!.visibility = View.GONE
                 this@MainActivity.mainRecordingButton!!.transitionToButtonState(RecordButton.ButtonState.TRANSITION_FROM_PAUSE)
                 this@MainActivity.recordingState = ActionState.RECORDING_IN_PROGRESS
             }
         }
 
         fun recordingReset() {
-            this@MainActivity.finishedPanel!!.visibility = View.GONE
+            postRecordingPanel!!.visibility = View.GONE
             this@MainActivity.optionsPanel!!.visibility = View.VISIBLE
-            this@MainActivity.modesPanel!!.visibility = View.VISIBLE
+            recordStatusMessage!!.visibility = View.GONE
+            mainRecordingButton!!.innerButton().isVisible = false
+            captureStartButton!!.isVisible = true
+            recordOptionsFullPanel!!.isVisible = true
             this@MainActivity.mainRecordingButton!!.transitionToButtonState(RecordButton.ButtonState.TRANSITION_TO_RESTART)
-            this@MainActivity.finishedPanel!!.visibility = View.GONE
+            postRecordingPanel!!.visibility = View.GONE
             this@MainActivity.optionsPanel!!.visibility = View.VISIBLE
-            this@MainActivity.modesPanel!!.visibility = View.VISIBLE
             this@MainActivity.recordingState = ActionState.RECORDING_STOPPED
         }
 
@@ -363,8 +434,50 @@ class MainActivity : AppCompatActivity() {
         doUnbindService()
     }
 
+    var recordOptionsButtonIcons: RelativeLayout? = null
+    var recordOptionsButtonText: TextView? = null
+    var recordOptionsButton: RecordOptionsButton? = null
+    var recordOptionsFullPanel: LinearLayout? = null
+    var captureOptionsPanel: LinearLayout? = null
+
+    private var recordOptionsOpen = false
+    private var menuHiddenTopMargin = 0
+
+    private fun toggleMenu() {
+        if (recordOptionsOpen) {
+            closeMenu()
+        } else {
+            openMenu()
+        }
+    }
+
+    private fun openMenu() {
+        val display = (baseContext.getSystemService("display") as DisplayManager).getDisplay(0)
+        if (display.rotation == Surface.ROTATION_270 || display.rotation == Surface.ROTATION_90) {
+            captureStartButton!!.isVisible = false
+        }
+        recordOptionsOpen = true
+        captureOptionsPanel!!.translationY = -captureOptionsPanel!!.measuredHeight.toFloat()
+        captureOptionsPanel!!.animate().translationY(0F).setDuration(300L).withStartAction {
+            recordOptionsButton!!.setupBackgroundOpened()
+            captureOptionsPanel!!.isVisible = true
+        }.start()
+    }
+
+    private fun closeMenu() {
+        recordOptionsOpen = false
+        menuHiddenTopMargin = -captureOptionsPanel!!.height
+        recordOptionsButton!!.setupBackground()
+        captureOptionsPanel!!.animate().translationY(menuHiddenTopMargin.toFloat()).setDuration(300L).withEndAction {
+            captureOptionsPanel!!.isVisible = false
+            captureStartButton!!.isVisible = true
+        }.start()
+    }
+
     override fun onCreate(bundle: Bundle?) {
-        val display: Display = (baseContext.getSystemService("display") as DisplayManager).getDisplay(Display.DEFAULT_DISPLAY)
+        val splashScreen = installSplashScreen()
+        val display: Display =
+            (baseContext.getSystemService("display") as DisplayManager).getDisplay(Display.DEFAULT_DISPLAY)
         this.display = display
         val rotation: Int = display.rotation
         val displayMetrics = DisplayMetrics()
@@ -375,31 +488,37 @@ class MainActivity : AppCompatActivity() {
         if (this.appSettings!!.getDarkTheme(true) != this.appSettings!!.getDarkTheme(false)) {
             this.appSettings!!.setDarkTheme(true, darkTheme)
         }
-        if (((getResources().configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES && darkTheme == GlobalProperties.DarkThemeProperty.AUTOMATIC) || darkTheme == GlobalProperties.DarkThemeProperty.DARK) {
-            setTheme(R.style.Theme_CaptureCap_Dark_NoActionBar)
-        } else {
-            setTheme(R.style.Theme_CaptureCap_Light_NoActionBar)
+        when (darkTheme) {
+            GlobalProperties.DarkThemeProperty.DARK -> {
+                if ((getResources().configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) != Configuration.UI_MODE_NIGHT_YES) {
+                    AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
+                }
+            }
+            GlobalProperties.DarkThemeProperty.LIGHT -> {
+                if ((getResources().configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) != Configuration.UI_MODE_NIGHT_NO) {
+                    AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
+                }
+            }
+            else -> {
+                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
+            }
         }
         super.onCreate(bundle)
 
         setContentView(R.layout.main)
-
-        if (((getResources().configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES && darkTheme == GlobalProperties.DarkThemeProperty.AUTOMATIC) || darkTheme == GlobalProperties.DarkThemeProperty.DARK) {
-            findViewById<LinearLayout>(R.id.statusbar).setBackgroundColor(getColor(R.color.statusbar_dark))
-        }
 
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.VANILLA_ICE_CREAM) {
             findViewById<LinearLayout>(R.id.statusbar).visibility = View.GONE
         }
 
         var statusBarHeight = 0
-        val resourceId = getResources().getIdentifier("status_bar_height", "dimen", "android")
+        var resourceId = getResources().getIdentifier("status_bar_height", "dimen", "android")
         if (resourceId > 0) {
             statusBarHeight = getResources().getDimensionPixelSize(resourceId)
         }
 
         val statusbarlayout = findViewById<LinearLayout?>(R.id.statusbar)
-        val statusbarlayoutparams: LinearLayout.LayoutParams = statusbarlayout.layoutParams as LinearLayout.LayoutParams
+        val statusbarlayoutparams: FrameLayout.LayoutParams = statusbarlayout.layoutParams as FrameLayout.LayoutParams
         statusbarlayoutparams.height = statusBarHeight
         statusbarlayout.setLayoutParams(statusbarlayoutparams)
 
@@ -416,15 +535,11 @@ class MainActivity : AppCompatActivity() {
             WindowInsetsCompat.CONSUMED
         }
 
-        val recordPanel: View = findViewById(R.id.recordpanel)
-        val layoutParams: RelativeLayout.LayoutParams =
-            recordPanel.layoutParams as RelativeLayout.LayoutParams
+        val recordPanel: LinearLayout = findViewById(R.id.mainlayout)
         if ((rotation == Surface.ROTATION_270 || rotation == Surface.ROTATION_90) && displayMetrics.widthPixels > displayMetrics.heightPixels) {
-            layoutParams.addRule(RelativeLayout.RIGHT_OF, R.id.recordingmainbutton)
-            recordPanel.setLayoutParams(layoutParams)
+            recordPanel.orientation = LinearLayout.HORIZONTAL
         } else {
-            layoutParams.addRule(RelativeLayout.BELOW, R.id.recordingmainbutton)
-            recordPanel.setLayoutParams(layoutParams)
+            recordPanel.orientation = LinearLayout.VERTICAL
         }
         if (this.appSettings!!.getFloatingControlsSize() == GlobalProperties.FloatingControlsSizeProperty.LITTLE) {
             this.appSettings!!.setFloatingControlsSize(GlobalProperties.FloatingControlsSizeProperty.TINY)
@@ -444,39 +559,28 @@ class MainActivity : AppCompatActivity() {
         updateRecordModeData()
         val darkTheme2: GlobalProperties.DarkThemeProperty = this.appSettings!!.getDarkTheme(true)
         if (((getResources().configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES && darkTheme == GlobalProperties.DarkThemeProperty.AUTOMATIC) || darkTheme2 == GlobalProperties.DarkThemeProperty.DARK) {
-            this.recordScreenState = VectorDrawableCompat.create(getResources(), R.drawable.icon_record_screen_dark, null)
-            this.recordScreenStateDisabled = VectorDrawableCompat.create(getResources(), R.drawable.icon_record_screen_disabled_dark, null)
-            this.recordMicrophoneState = VectorDrawableCompat.create(getResources(), R.drawable.icon_record_mic_dark, null)
-            this.recordMicrophoneStateDisabled = VectorDrawableCompat.create(getResources(), R.drawable.icon_record_mic_disabled_dark, null)
-            this.recordPlaybackState = VectorDrawableCompat.create(getResources(), R.drawable.icon_record_audio_dark, null)
-            this.recordPlaybackStateDisabled = VectorDrawableCompat.create(getResources(), R.drawable.icon_record_audio_disabled_dark, null)
-            this.recordStreamState = VectorDrawableCompat.create(getResources(), R.drawable.icon_record_stream_dark, null)
-            this.recordStreamStateDisabled = VectorDrawableCompat.create(getResources(), R.drawable.icon_record_stream_disabled_dark, null)
-            this.recordInfoIcon = VectorDrawableCompat.create(getResources(), R.drawable.icon_record_info_dark, null)
-            this.recordSettingsIcon = VectorDrawableCompat.create(getResources(), R.drawable.icon_record_settings_dark, null)
-            this.recordShareIcon = VectorDrawableCompat.create(getResources(), R.drawable.icon_record_share_dark, null)
-            this.recordDeleteIcon = VectorDrawableCompat.create(getResources(), R.drawable.icon_record_delete_dark, null)
-            this.recordCropIcon = VectorDrawableCompat.create(getResources(), R.drawable.icon_record_crop_dark, null)
-            this.recordOpenIcon = VectorDrawableCompat.create(getResources(), R.drawable.icon_record_play_dark, null)
-            this.recordStopIcon = VectorDrawableCompat.create(getResources(), R.drawable.icon_record_stop_dark, null)
         } else {
-            this.recordScreenState = VectorDrawableCompat.create(getResources(), R.drawable.icon_record_screen, null)
-            this.recordScreenStateDisabled = VectorDrawableCompat.create(getResources(), R.drawable.icon_record_screen_disabled, null)
-            this.recordMicrophoneState = VectorDrawableCompat.create(getResources(), R.drawable.icon_record_mic, null)
-            this.recordMicrophoneStateDisabled = VectorDrawableCompat.create(getResources(), R.drawable.icon_record_mic_disabled, null)
-            this.recordPlaybackState = VectorDrawableCompat.create(getResources(), R.drawable.icon_record_audio, null)
-            this.recordPlaybackStateDisabled = VectorDrawableCompat.create(getResources(), R.drawable.icon_record_audio_disabled, null)
-            this.recordStreamState = VectorDrawableCompat.create(getResources(), R.drawable.icon_record_stream, null)
-            this.recordStreamStateDisabled = VectorDrawableCompat.create(getResources(), R.drawable.icon_record_stream_disabled, null)
-            this.recordInfoIcon = VectorDrawableCompat.create(getResources(), R.drawable.icon_record_info, null)
-            this.recordSettingsIcon = VectorDrawableCompat.create(getResources(), R.drawable.icon_record_settings, null)
-            this.recordShareIcon = VectorDrawableCompat.create(getResources(), R.drawable.icon_record_share, null)
-            this.recordDeleteIcon = VectorDrawableCompat.create(getResources(), R.drawable.icon_record_delete, null)
-            this.recordOpenIcon = VectorDrawableCompat.create(getResources(), R.drawable.icon_record_play, null)
-            this.recordCropIcon = VectorDrawableCompat.create(getResources(), R.drawable.icon_record_crop, null)
-            this.recordStopIcon = VectorDrawableCompat.create(getResources(), R.drawable.icon_record_stop, null)
         }
         this.mainRecordingButton = RecordButton(baseContext, findViewById<ImageButton>(R.id.recordingmainbutton)!!)
+        this.captureStartButton = findViewById<Button>(R.id.capture_start_button)
+        this.captureStartButton!!.setOnClickListener(object: View.OnClickListener {
+            override fun onClick(view: View) {
+                if (this@MainActivity.recordingState == ActionState.RECORDING_ENDED) {
+                    this@MainActivity.recordingBinder!!.recordingReset()
+                } else if (this@MainActivity.recordingState == ActionState.RECORDING_PAUSED) {
+                    this@MainActivity.mainRecordingButton!!.transitionToButtonState(RecordButton.ButtonState.TRANSITION_FROM_PAUSE)
+                    this@MainActivity.recordingBinder!!.recordingResume()
+                } else if (this@MainActivity.recordingState != ActionState.RECORDING_STOPPED) {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && !recordStream) {
+                        this@MainActivity.recordingBinder!!.recordingPause()
+                    } else {
+                        this@MainActivity.recordingBinder!!.stopService()
+                    }
+                } else {
+                    this@MainActivity.recordingStart()
+                }
+            }
+        })
         updateRecordButtonConditions()
         this.mainRecordingButton!!.innerButton().setOnClickListener(object: View.OnClickListener {
             override fun onClick(view: View) {
@@ -500,237 +604,296 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         })
-        findViewById<RelativeLayout>(R.id.mainlayout).setOnClickListener { this@MainActivity.mainRecordingButton!!.releaseFocus() }
-        this.recordScreenSetting = findViewById<ImageButton>(R.id.recordscreen)!!
-        this.recordMicrophoneSetting = findViewById<ImageButton>(R.id.recordmicrohone)!!
-        this.recordAudioSetting = findViewById<ImageButton>(R.id.recordaudio)!!
-        this.recordStreamSetting = findViewById<ImageButton>(R.id.recordstream)!!
+        findViewById<LinearLayout>(R.id.mainlayout).setOnClickListener { this@MainActivity.mainRecordingButton!!.releaseFocus() }
         this.recordInfo = findViewById<ImageButton>(R.id.openinfo)!!
         this.recordSettings = findViewById<ImageButton>(R.id.opensettings)!!
-        this.recordShare = findViewById<ImageButton>(R.id.sharerecord)!!
-        this.recordDelete = findViewById<ImageButton>(R.id.deleterecord)!!
-        this.recordOpen = findViewById<ImageButton>(R.id.openrecord)!!
-        this.recordCrop = findViewById<ImageButton>(R.id.video_crop_button)!!
-        this.recordStop = findViewById<ImageButton>(R.id.recordstop)!!
-        this.recordScreenSetting!!.setImageDrawable(this.recordScreenStateDisabled)
-        this.recordMicrophoneSetting!!.setImageDrawable(this.recordMicrophoneStateDisabled)
-        this.recordAudioSetting!!.setImageDrawable(this.recordPlaybackStateDisabled)
-        this.recordStreamSetting!!.setImageDrawable(this.recordStreamStateDisabled)
-        this.recordInfo!!.setImageDrawable(this.recordInfoIcon)
-        this.recordSettings!!.setImageDrawable(this.recordSettingsIcon)
-        this.recordShare!!.setImageDrawable(this.recordShareIcon)
-        this.recordDelete!!.setImageDrawable(this.recordDeleteIcon)
-        this.recordOpen!!.setImageDrawable(this.recordOpenIcon)
-        this.recordCrop!!.setImageDrawable(this.recordCropIcon)
-        this.recordStop!!.setImageDrawable(this.recordStopIcon)
-        this.recordScreenSetting!!.setContentDescription(getResources().getString(R.string.setting_record_screen) + ": " + getResources().getString(R.string.option_deactivated))
-        this.recordMicrophoneSetting!!.setContentDescription(getResources().getString(R.string.setting_audio_record_microphone_sound) + ": " + getResources().getString(R.string.option_deactivated))
-        this.recordAudioSetting!!.setContentDescription(getResources().getString(R.string.setting_audio_record_playback_sound) + ": " + getResources().getString(R.string.option_deactivated))
-        this.recordStreamSetting!!.setContentDescription(getResources().getString(R.string.setting_enable_stream) + ": " + getResources().getString(R.string.option_deactivated))
+        postRecordShare = findViewById<Button>(R.id.post_record_controls_share)
+        postRecordDelete = findViewById<Button>(R.id.post_record_controls_delete)
+        postRecordOpen = findViewById<Button>(R.id.post_record_controls_open)
+        postRecordCrop = findViewById<Button>(R.id.post_record_controls_crop)
+        postRecordBack = findViewById<Button>(R.id.post_record_controls_back)
 
-        this.recordScreenSetting!!.let { TooltipCompat.setTooltipText(it, getResources().getString(R.string.setting_record_screen)) }
-        this.recordMicrophoneSetting!!.let { TooltipCompat.setTooltipText(it, getResources().getString(R.string.setting_audio_record_microphone_sound)) }
-        this.recordAudioSetting!!.let { TooltipCompat.setTooltipText(it, getResources().getString(R.string.setting_audio_record_playback_sound)) }
-        this.recordStreamSetting!!.let { TooltipCompat.setTooltipText(it, getResources().getString(R.string.setting_enable_stream)) }
+        captureOptionStream = findViewById<ImageView>(R.id.record_options_button_icon_stream)!!
+        captureOptionRecord = findViewById<ImageView>(R.id.record_options_button_icon_record)!!
+        captureOptionScreen = findViewById<ImageView>(R.id.record_options_button_icon_screen)!!
+        captureOptionAudio = findViewById<ImageView>(R.id.record_options_button_icon_audio_playback)!!
+        captureOptionMicrophone = findViewById<ImageView>(R.id.record_options_button_icon_microphone)!!
+
+        updateCaptureOptionsIcons()
+
+        recordOptionsButtonIcons = findViewById<RelativeLayout>(R.id.record_options_button_icons)!!
+        recordOptionsButtonText = findViewById<TextView>(R.id.record_options_button_text)!!
+        recordOptionsButton = findViewById<RecordOptionsButton>(R.id.record_options_button)!!
+        recordOptionsFullPanel = findViewById<LinearLayout>(R.id.record_options)!!
+        captureOptionsPanel = findViewById<LinearLayout>(R.id.capture_options)!!
+
+        captureOptionsPanel = findViewById(R.id.capture_options)
+
+        captureOptionsPanel!!.post {
+            captureOptionsPanel!!.measure(0, 0)
+            menuHiddenTopMargin = -captureOptionsPanel!!.height
+            captureOptionsPanel!!.translationY = menuHiddenTopMargin.toFloat()
+            captureOptionsPanel!!.isVisible = recordOptionsOpen
+        }
+
+
+        captureOptionsPanel = findViewById<LinearLayout>(R.id.capture_options)
+
+
+        captureOptionsPanel!!.isVisible = recordOptionsOpen
+
+        recordOptionsButton!!.setOnClickListener {
+            updateCaptureOptionsIcons()
+            toggleMenu()
+
+            recordOptionsButtonIcons!!.isVisible = !recordOptionsOpen
+
+            if (recordOptionsOpen) {
+                val params: LayoutParams = recordOptionsButtonText!!.layoutParams!! as LayoutParams
+
+                params.removeRule(RelativeLayout.ALIGN_PARENT_RIGHT)
+                params.addRule(RelativeLayout.CENTER_IN_PARENT)
+
+                recordOptionsButtonText!!.layoutParams = params
+            } else {
+                val params: LayoutParams = recordOptionsButtonText!!.layoutParams!! as LayoutParams
+
+                params.addRule(RelativeLayout.ALIGN_PARENT_RIGHT)
+                params.removeRule(RelativeLayout.CENTER_IN_PARENT)
+
+                recordOptionsButtonText!!.layoutParams = params
+            }
+        }
+
+        captureModeMenu = findViewById<LinearLayout>(R.id.button_mode_menu)
+        val recordBtn = findViewById<CaptureSwitchModeButton>(R.id.button_mode_record)
+        val streamBtn = findViewById<CaptureSwitchModeButton>(R.id.button_mode_stream)
+
+        if (this@MainActivity.recordStream) {
+            streamBtn.isSelected = true
+        } else {
+            recordBtn.isSelected = true
+        }
+
+
+        recordBtn.setOnClickListener {
+            if (streamBtn.isSelected) {
+                streamBtn.isSelected = false
+            }
+            recordBtn.isSelected = true
+            this@MainActivity.recordStream = false
+            this@MainActivity.appSettings?.setBooleanProperty(GlobalProperties.PropertiesBoolean.CHECK_STREAM, false)
+        }
+
+        streamBtn.setOnClickListener {
+            showStreamCredentialsDialog { data ->
+                if (data != null) {
+                    if (!data.url.isEmpty()) {
+                        if (recordBtn.isSelected) {
+                            recordBtn.isSelected = false
+                        }
+                        streamBtn.isSelected = true
+
+                        this@MainActivity.recordStream = true
+                        this@MainActivity.appSettings?.setBooleanProperty(GlobalProperties.PropertiesBoolean.CHECK_STREAM, true)
+                    }
+                }
+            }
+        }
+        recordOptionsPanel = findViewById<LinearLayout>(R.id.record_options_panel)
+
+        recordControls = findViewById<LinearLayout>(R.id.record_controls)
+        recordControlPause = findViewById<Button>(R.id.record_controls_pause)
+        recordControlResume = findViewById<Button>(R.id.record_controls_resume)
+        recordControlStop = findViewById<Button>(R.id.record_controls_stop)
+
+        if (recordStream) {
+            recordControlPause!!.isVisible = false
+            recordControlResume!!.isVisible = false
+        }
+
+        recordControlPause!!.setOnClickListener {
+            this@MainActivity.recordingBinder!!.recordingPause()
+            recordControlResume!!.isVisible = true
+            recordControlPause!!.isVisible = false
+        }
+
+        recordControlResume!!.setOnClickListener {
+            this@MainActivity.recordingBinder!!.recordingResume()
+            recordControlResume!!.isVisible = false
+            recordControlPause!!.isVisible = true
+        }
+
+        recordControlStop!!.setOnClickListener {
+            if (!recordStream) {
+                recordControlPause!!.isVisible = true
+            }
+            recordControlResume!!.isVisible = false
+            this@MainActivity.mainRecordingButton!!.releaseFocus()
+            this@MainActivity.recordingBinder!!.stopService()
+        }
+
+        recordOptionScreen = findViewById<RecordSettingButton>(R.id.record_option_screen)
+        recordOptionSound = findViewById<RecordSettingButton>(R.id.record_option_audio)
+        recordOptionMicrophone = findViewById<RecordSettingButton>(R.id.record_option_microphone)
+
+        recordOptionScreen!!.setSwitchChecked(!recordOnlyAudio)
+        recordOptionSound!!.setSwitchChecked(recordPlayback)
+        recordOptionMicrophone!!.setSwitchChecked(recordMicrophone)
+
+        recordOptionScreen!!.setOnToggleListener(object: RecordSettingButton.OnToggleListener {
+            override fun onToggle(isChecked: Boolean) {
+                this@MainActivity.mainRecordingButton!!.releaseFocus()
+
+                if (!isChecked && !this@MainActivity.recordMicrophone && (!this@MainActivity.recordPlayback || Build.VERSION.SDK_INT < Build.VERSION_CODES.Q)) {
+                    recordOptionScreen!!.setSwitchChecked(true)
+                } else {
+                    if (this@MainActivity.recordOnlyAudio) {
+                        this@MainActivity.recordOnlyAudio = false
+                        this@MainActivity.setRecordMode(false)
+                    } else if (!this@MainActivity.recordOnlyAudio && (this@MainActivity.recordMicrophone || this@MainActivity.recordPlayback)) {
+                        if ((Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && this@MainActivity.checkSelfPermission(
+                                Manifest.permission.RECORD_AUDIO
+                            ) == PackageManager.PERMISSION_GRANTED) || Build.VERSION.SDK_INT < Build.VERSION_CODES.M
+                        ) {
+                            this@MainActivity.recordOnlyAudio = true
+                            this@MainActivity.setRecordMode(true)
+                        } else {
+                            this@MainActivity.recordOnlyAudio = false
+                            this@MainActivity.requestPermissions(
+                                arrayOf(Manifest.permission.RECORD_AUDIO),
+                                RecordingPermissionRequest.REQUEST_MODE_CHANGE.ordinal
+                            )
+                        }
+                    }
+                }
+                this@MainActivity.updateRecordButtonConditions()
+            }
+        })
+
+        recordOptionMicrophone!!.setOnToggleListener(object: RecordSettingButton.OnToggleListener {
+            override fun onToggle(isChecked: Boolean) {
+                this@MainActivity.mainRecordingButton!!.releaseFocus()
+
+                if (!isChecked && this@MainActivity.recordOnlyAudio && (!this@MainActivity.recordPlayback || Build.VERSION.SDK_INT < Build.VERSION_CODES.Q)) {
+                    recordOptionMicrophone!!.setSwitchChecked(true)
+                } else {
+                    if (((Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && this@MainActivity.checkSelfPermission(
+                            Manifest.permission.RECORD_AUDIO
+                        ) == PackageManager.PERMISSION_GRANTED) || Build.VERSION.SDK_INT < Build.VERSION_CODES.M) || this@MainActivity.recordMicrophone
+                    ) {
+                        if (!this@MainActivity.recordOnlyAudio || this@MainActivity.recordPlayback) {
+                            this@MainActivity.recordMicrophone = !this@MainActivity.recordMicrophone
+                            this@MainActivity.appSettings!!.setBooleanProperty(
+                                GlobalProperties.PropertiesBoolean.CHECK_SOUND_MIC,
+                                this@MainActivity.recordMicrophone
+                            )
+                        }
+                    } else {
+                        this@MainActivity.recordMicrophone = false
+                        this@MainActivity.requestPermissions(
+                            arrayOf(Manifest.permission.RECORD_AUDIO),
+                            RecordingPermissionRequest.REQUEST_MICROPHONE.ordinal
+                        )
+                    }
+                }
+                this@MainActivity.updateRecordButtonConditions()
+            }
+        })
+
+        recordOptionSound!!.setOnToggleListener(object: RecordSettingButton.OnToggleListener {
+            override fun onToggle(isChecked: Boolean) {
+                this@MainActivity.mainRecordingButton!!.releaseFocus()
+
+                if (!isChecked && this@MainActivity.recordOnlyAudio && !this@MainActivity.recordMicrophone) {
+                    recordOptionSound!!.setSwitchChecked(true)
+                } else {
+                    if ((Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && this@MainActivity.checkSelfPermission(
+                            Manifest.permission.RECORD_AUDIO
+                        ) == PackageManager.PERMISSION_GRANTED) || this@MainActivity.recordPlayback
+                    ) {
+                        if (!this@MainActivity.recordOnlyAudio || this@MainActivity.recordMicrophone) {
+                            this@MainActivity.recordPlayback = !this@MainActivity.recordPlayback
+                            this@MainActivity.appSettings!!.setBooleanProperty(
+                                GlobalProperties.PropertiesBoolean.CHECK_SOUND_PLAYBACK,
+                                this@MainActivity.recordPlayback
+                            )
+                        }
+                    } else {
+                        this@MainActivity.recordPlayback = false
+                        this@MainActivity.requestPermissions(
+                            arrayOf(Manifest.permission.RECORD_AUDIO),
+                            RecordingPermissionRequest.REQUEST_MICROPHONE_PLAYBACK.ordinal
+                        )
+                    }
+                }
+                this@MainActivity.updateRecordButtonConditions()
+            }
+        })
+
+
+
         this.recordInfo!!.let { TooltipCompat.setTooltipText(it, getResources().getString(R.string.info_title)) }
         this.recordSettings!!.let { TooltipCompat.setTooltipText(it, getResources().getString(R.string.settings_title)) }
-        this.recordShare!!.let { TooltipCompat.setTooltipText(it, getResources().getString(R.string.record_share)) }
-        this.recordDelete!!.let { TooltipCompat.setTooltipText(it, getResources().getString(R.string.record_delete)) }
-        this.recordOpen!!.let { TooltipCompat.setTooltipText(it, getResources().getString(R.string.record_open)) }
-        this.recordCrop!!.let { TooltipCompat.setTooltipText(it, getResources().getString(R.string.record_crop)) }
-        this.recordStop!!.let { TooltipCompat.setTooltipText(it, getResources().getString(R.string.record_stop)) }
 
-        this.timerPanel = findViewById<LinearLayout>(R.id.recordtimerpanel)!!
-        this.modesPanel = findViewById<LinearLayout>(R.id.recordmodepanel)!!
-        this.finishedPanel = findViewById<LinearLayout>(R.id.recordfinishedpanel)!!
-        this.optionsPanel = findViewById<LinearLayout>(R.id.optionspanel)!!
+        postRecordingPanel = findViewById<LinearLayout>(R.id.post_record_controls)
+        this.optionsPanel = findViewById<FrameLayout>(R.id.optionspanel)!!
         this.timeCounter = findViewById<Chronometer>(R.id.timerrecord)!!
+        recordStatusMessage = findViewById<TextView>(R.id.record_status_message)!!
         this.audioPlaybackUnavailable = findViewById<TextView>(R.id.audioplaybackunavailable)!!
+
+        resourceId = resources.getIdentifier("navigation_bar_height", "dimen", "android")
+        if (resourceId > 0) {
+            val optionslayoutparams: FrameLayout.LayoutParams = optionsPanel?.layoutParams as FrameLayout.LayoutParams
+
+            val display = (baseContext.getSystemService("display") as DisplayManager).getDisplay(0)
+            if (display.rotation == Surface.ROTATION_270) {
+                optionslayoutparams.bottomMargin = 0
+                optionslayoutparams.rightMargin = statusBarHeight            } else if (display.rotation == Surface.ROTATION_90) {
+                optionslayoutparams.bottomMargin = 0
+                optionslayoutparams.rightMargin = resources.getDimensionPixelSize(resourceId)
+            } else {
+                optionslayoutparams.bottomMargin = resources.getDimensionPixelSize(resourceId)
+                optionslayoutparams.rightMargin = 0
+            }
+            optionsPanel?.setLayoutParams(optionslayoutparams)
+        }
 
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
             this.audioPlaybackUnavailable!!.visibility = View.VISIBLE
-            this.recordAudioSetting!!.setVisibility(View.GONE)
-            this.recordStreamSetting!!.setVisibility(View.GONE)
-            this.recordCrop!!.setVisibility(View.GONE)
+            captureModeMenu!!.visibility = View.GONE
+            recordOptionSound!!.visibility = View.GONE
+            postRecordCrop!!.visibility = View.GONE
         }
-        if (!this.recordOnlyAudio) {
-            this.recordScreenSetting!!.setImageDrawable(this.recordScreenState)
-            this.recordScreenSetting!!.setContentDescription(getResources().getString(R.string.setting_record_screen) + ": " + getResources().getString(R.string.option_activated))
-        }
-        if (this.recordMicrophone) {
-            this.recordMicrophoneSetting!!.setImageDrawable(this.recordMicrophoneState)
-            this.recordMicrophoneSetting!!.setContentDescription(getResources().getString(R.string.setting_audio_record_microphone_sound) + ": " + getResources().getString(R.string.option_activated))
-        }
-        if (this.recordPlayback) {
-            this.recordAudioSetting!!.setImageDrawable(this.recordPlaybackState)
-            this.recordAudioSetting!!.setContentDescription(getResources().getString(R.string.setting_audio_record_playback_sound) + ": " + getResources().getString(R.string.option_activated))
-        }
-        if (this.recordStream) {
-            this.recordStreamSetting!!.setImageDrawable(this.recordStreamState)
-            this.recordStreamSetting!!.setContentDescription(getResources().getString(R.string.setting_enable_stream) + ": " + getResources().getString(R.string.option_activated))
-        }
+
         setRecordMode(this.appSettings!!.getBooleanProperty(GlobalProperties.PropertiesBoolean.RECORD_MODE, false))
         this.activityProjectionManager = getSystemService("media_projection") as MediaProjectionManager
 
-
-        this.recordCrop!!.setOnClickListener(object: View.OnClickListener {
+        postRecordCrop!!.setOnClickListener(object: View.OnClickListener {
             override fun onClick(v: View?) {
                 this@MainActivity.startActivity(Intent(this@MainActivity, RecordingCropScreen::class.java))
             }
         })
 
-
-        this.recordScreenSetting!!.setOnClickListener {
-            this@MainActivity.mainRecordingButton!!.releaseFocus()
-
-            if (this@MainActivity.recordOnlyAudio) {
-                this@MainActivity.recordScreenSetting!!.setImageDrawable(this@MainActivity.recordScreenState)
-                this@MainActivity.recordOnlyAudio = false
-                this@MainActivity.recordScreenSetting!!.setContentDescription(this@MainActivity.getResources().getString(R.string.setting_record_screen) + ": " + this@MainActivity.getResources().getString(R.string.option_activated))
-                this@MainActivity.setRecordMode(false)
-            } else if (!this@MainActivity.recordOnlyAudio && (this@MainActivity.recordMicrophone || this@MainActivity.recordPlayback)) {
-                if ((Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && this@MainActivity.checkSelfPermission(
-                        Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED) || Build.VERSION.SDK_INT < Build.VERSION_CODES.M
-                ) {
-                    this@MainActivity.recordOnlyAudio = true
-                    this@MainActivity.recordScreenSetting!!.setImageDrawable(this@MainActivity.recordScreenStateDisabled)
-                    this@MainActivity.recordScreenSetting!!.setContentDescription(this@MainActivity.getResources().getString(R.string.setting_record_screen) + ": " + this@MainActivity.getResources().getString(R.string.option_deactivated))
-                    this@MainActivity.setRecordMode(true)
-                } else {
-                    this@MainActivity.recordOnlyAudio = false
-                    this@MainActivity.recordScreenSetting!!.setImageDrawable(this@MainActivity.recordScreenState)
-                    this@MainActivity.recordScreenSetting!!.setContentDescription(this@MainActivity.getResources().getString(R.string.setting_record_screen) + ": " + this@MainActivity.getResources().getString(R.string.option_activated))
-                    this@MainActivity.requestPermissions(arrayOf(Manifest.permission.RECORD_AUDIO),RecordingPermissionRequest.REQUEST_MODE_CHANGE.ordinal)
-                }
+        postRecordBack!!.setOnClickListener(object: View.OnClickListener {
+            override fun onClick(v: View?) {
+                this@MainActivity.recordingBinder!!.recordingReset()
             }
-            this@MainActivity.updateRecordButtonConditions()
-        }
+        })
 
-        this.recordMicrophoneSetting!!.setOnClickListener {
-            this@MainActivity.mainRecordingButton!!.releaseFocus()
-
-            if (((Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && this@MainActivity.checkSelfPermission(Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED) || Build.VERSION.SDK_INT < Build.VERSION_CODES.M) || this@MainActivity.recordMicrophone) {
-                if (!this@MainActivity.recordOnlyAudio || this@MainActivity.recordPlayback) {
-                    this@MainActivity.recordMicrophone = !this@MainActivity.recordMicrophone
-                    this@MainActivity.appSettings!!.setBooleanProperty(
-                        GlobalProperties.PropertiesBoolean.CHECK_SOUND_MIC,
-                        this@MainActivity.recordMicrophone
-                    )
-                    if (this@MainActivity.recordMicrophone) {
-                        this@MainActivity.recordMicrophoneSetting!!.setImageDrawable(this@MainActivity.recordMicrophoneState)
-                        this@MainActivity.recordMicrophoneSetting!!.setContentDescription(
-                            this@MainActivity.getResources()
-                                .getString(R.string.setting_audio_record_microphone_sound) + ": " + this@MainActivity.getResources()
-                                .getString(R.string.option_activated)
-                        )
-                    } else {
-                        this@MainActivity.recordMicrophoneSetting!!.setImageDrawable(this@MainActivity.recordMicrophoneStateDisabled)
-                        this@MainActivity.recordMicrophoneSetting!!.setContentDescription(
-                            this@MainActivity.getResources()
-                                .getString(R.string.setting_audio_record_microphone_sound) + ": " + this@MainActivity.getResources()
-                                .getString(R.string.option_deactivated)
-                        )
-                    }
-                }
-            } else {
-                this@MainActivity.recordMicrophone = false
-                this@MainActivity.recordMicrophoneSetting!!.setImageDrawable(this@MainActivity.recordMicrophoneStateDisabled)
-                this@MainActivity.recordMicrophoneSetting!!.setContentDescription(this@MainActivity.getResources().getString(R.string.setting_audio_record_microphone_sound) + ": " + this@MainActivity.getResources().getString(R.string.option_deactivated))
-                this@MainActivity.requestPermissions(arrayOf(Manifest.permission.RECORD_AUDIO), RecordingPermissionRequest.REQUEST_MICROPHONE.ordinal)
-            }
-            this@MainActivity.updateRecordButtonConditions()
-        }
-
-        this.recordAudioSetting!!.setOnClickListener {
-            this@MainActivity.mainRecordingButton!!.releaseFocus()
-
-            if ((Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && this@MainActivity.checkSelfPermission(Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED) || this@MainActivity.recordPlayback
-            ) {
-                if (!this@MainActivity.recordOnlyAudio || this@MainActivity.recordMicrophone) {
-                    this@MainActivity.recordPlayback = !this@MainActivity.recordPlayback
-                    this@MainActivity.appSettings!!.setBooleanProperty(
-                        GlobalProperties.PropertiesBoolean.CHECK_SOUND_PLAYBACK,
-                        this@MainActivity.recordPlayback
-                    )
-                    if (this@MainActivity.recordPlayback) {
-                        this@MainActivity.recordAudioSetting!!.setImageDrawable(this@MainActivity.recordPlaybackState)
-                        this@MainActivity.recordAudioSetting!!.setContentDescription(
-                            this@MainActivity.getResources()
-                                .getString(R.string.setting_audio_record_playback_sound) + ": " + this@MainActivity.getResources()
-                                .getString(R.string.option_activated)
-                        )
-                    } else {
-                        this@MainActivity.recordAudioSetting!!.setImageDrawable(this@MainActivity.recordPlaybackStateDisabled)
-                        this@MainActivity.recordAudioSetting!!.setContentDescription(
-                            this@MainActivity.getResources()
-                                .getString(R.string.setting_audio_record_playback_sound) + ": " + this@MainActivity.getResources()
-                                .getString(R.string.option_deactivated)
-                        )
-                    }
-                }
-            } else {
-                this@MainActivity.recordPlayback = false
-                this@MainActivity.recordAudioSetting!!.setImageDrawable(this@MainActivity.recordPlaybackStateDisabled)
-                this@MainActivity.recordAudioSetting!!.setContentDescription(this@MainActivity.getResources().getString(R.string.setting_audio_record_playback_sound) + ": " + this@MainActivity.getResources().getString(R.string.option_deactivated))
-                this@MainActivity.requestPermissions(arrayOf(Manifest.permission.RECORD_AUDIO),RecordingPermissionRequest.REQUEST_MICROPHONE_PLAYBACK.ordinal)
-            }
-            this@MainActivity.updateRecordButtonConditions()
-        }
-
-        this.recordStreamSetting!!.setOnClickListener {
-            this@MainActivity.mainRecordingButton!!.releaseFocus()
-
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                if (!this@MainActivity.recordStream) {
-                    showStreamCredentialsDialog() { data ->
-                        if (data != null) {
-                            if (!data.url.isEmpty()) {
-                                this@MainActivity.recordStream = true
-                                this@MainActivity.appSettings?.setBooleanProperty(GlobalProperties.PropertiesBoolean.CHECK_STREAM, true)
-                                this@MainActivity.recordStreamSetting!!.setImageDrawable(this@MainActivity.recordStreamState)
-                                this@MainActivity.recordStreamSetting!!.setContentDescription(
-                                    this@MainActivity.getResources()
-                                        .getString(R.string.setting_enable_stream) + ": " + this@MainActivity.getResources()
-                                        .getString(R.string.option_activated)
-                                )
-                            }
-                        }
-                    }
-                } else {
-                    this@MainActivity.recordStream = false
-                    this@MainActivity.appSettings?.setBooleanProperty(GlobalProperties.PropertiesBoolean.CHECK_STREAM, false)
-                    this@MainActivity.recordStreamSetting!!.setImageDrawable(this@MainActivity.recordStreamStateDisabled)
-                    this@MainActivity.recordStreamSetting!!.setContentDescription(
-                        this@MainActivity.getResources()
-                            .getString(R.string.setting_enable_stream) + ": " + this@MainActivity.getResources()
-                            .getString(R.string.option_deactivated)
-                    )
-                }
-            } else {
-                this@MainActivity.recordStream = false
-                this@MainActivity.recordStreamSetting!!.setImageDrawable(this@MainActivity.recordStreamStateDisabled)
-                this@MainActivity.recordStreamSetting!!.setContentDescription(this@MainActivity.getResources().getString(R.string.setting_enable_stream) + ": " + this@MainActivity.getResources().getString(R.string.option_deactivated))
-            }
-        }
-
-        this.recordShare!!.setOnClickListener {
+        postRecordShare!!.setOnClickListener {
             this@MainActivity.mainRecordingButton!!.releaseFocus()
             this@MainActivity.recordingBinder!!.recordingShare()
         }
 
-        this.recordDelete!!.setOnClickListener {
+        postRecordDelete!!.setOnClickListener {
             this@MainActivity.mainRecordingButton!!.releaseFocus()
             this@MainActivity.recordingBinder!!.recordingDelete()
         }
 
-        this.recordOpen!!.setOnClickListener {
+        postRecordOpen!!.setOnClickListener {
             this@MainActivity.mainRecordingButton!!.releaseFocus()
             this@MainActivity.recordingBinder!!.recordingOpen()
-        }
-
-        this.recordStop!!.setOnClickListener {
-            this@MainActivity.mainRecordingButton!!.releaseFocus()
-            this@MainActivity.recordingBinder!!.stopService()
         }
 
         this.recordInfo!!.setOnClickListener {
@@ -800,6 +963,55 @@ class MainActivity : AppCompatActivity() {
     fun setRecordMode(audioOnly: Boolean) {
         this.appSettings!!.setBooleanProperty(GlobalProperties.PropertiesBoolean.RECORD_MODE, audioOnly)
         this.recordModeChosen = audioOnly
+    }
+
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+
+        var statusBarHeight = 0
+        var resourceId = getResources().getIdentifier("status_bar_height", "dimen", "android")
+        if (resourceId > 0) {
+            statusBarHeight = getResources().getDimensionPixelSize(resourceId)
+        }
+
+        val statusbarlayout = findViewById<LinearLayout?>(R.id.statusbar)!!
+
+        val statusbarlayoutparams: FrameLayout.LayoutParams = statusbarlayout.layoutParams as FrameLayout.LayoutParams
+        statusbarlayoutparams.height = statusBarHeight
+        statusbarlayout.setLayoutParams(statusbarlayoutparams)
+
+        val recordPanel: LinearLayout = findViewById(R.id.mainlayout)
+        if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            recordPanel.orientation = LinearLayout.HORIZONTAL
+        } else {
+            recordPanel.orientation = LinearLayout.VERTICAL
+        }
+
+        val optionslayoutparams: FrameLayout.LayoutParams = optionsPanel?.layoutParams as FrameLayout.LayoutParams
+
+        resourceId = resources.getIdentifier("navigation_bar_height", "dimen", "android")
+
+        val display = (baseContext.getSystemService("display") as DisplayManager).getDisplay(0)
+
+        if (recordOptionsOpen) {
+            if (display.rotation == Surface.ROTATION_270 || display.rotation == Surface.ROTATION_90) {
+                captureStartButton!!.visibility = View.GONE
+            } else {
+                captureStartButton!!.visibility = View.VISIBLE
+            }
+        }
+
+        if (display.rotation == Surface.ROTATION_270) {
+            optionslayoutparams.bottomMargin = 0
+            optionslayoutparams.rightMargin = statusBarHeight
+        } else if (display.rotation == Surface.ROTATION_90) {
+            optionslayoutparams.bottomMargin = 0
+            optionslayoutparams.rightMargin = resources.getDimensionPixelSize(resourceId)
+        } else {
+            optionslayoutparams.bottomMargin = resources.getDimensionPixelSize(resourceId)
+            optionslayoutparams.rightMargin = 0
+        }
+        optionsPanel?.setLayoutParams(optionslayoutparams)
     }
 
     override fun onStart() {

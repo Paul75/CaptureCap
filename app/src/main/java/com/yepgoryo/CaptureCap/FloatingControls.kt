@@ -2,8 +2,6 @@ package com.yepgoryo.CaptureCap
 
 import android.app.Service
 import android.content.Intent
-import android.content.res.Configuration
-import android.graphics.Color
 import android.graphics.PixelFormat
 import android.graphics.Point
 import android.hardware.Sensor
@@ -12,11 +10,9 @@ import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import android.hardware.display.DisplayManager
 import android.os.Binder
-import android.os.Build
 import android.os.IBinder
 import android.os.SystemClock
 import android.util.DisplayMetrics
-import android.util.Log
 import android.view.Display
 import android.view.Gravity
 import android.view.MotionEvent
@@ -28,8 +24,6 @@ import android.widget.Chronometer
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.LinearLayout
-import androidx.appcompat.app.AppCompatDelegate
-import androidx.core.content.res.ResourcesCompat
 
 class FloatingControls : Service() {
 
@@ -58,6 +52,7 @@ class FloatingControls : Service() {
     private var recordingPanelBinder: ScreenRecorder.RecordingPanelBinder? = null
     private var recordingProgress: Chronometer? = null
     private var resumeButton: ImageButton? = null
+    private var panelWrapped: LinearLayout? = null
     private var sensor: SensorManager? = null
     private var startAction: String? = null
     private var stopButton: ImageButton? = null
@@ -73,6 +68,7 @@ class FloatingControls : Service() {
     fun closePanel() {
         if (this.floatingPanel != null) {
             this.windowManager?.removeView(this.floatingPanel)
+            floatingPanel = null
         }
     }
 
@@ -187,26 +183,12 @@ class FloatingControls : Service() {
         fun setPause(timeRecorded: Long) {
             this@FloatingControls.recordingProgress?.setBase(SystemClock.elapsedRealtime() - timeRecorded)
             this@FloatingControls.recordingProgress?.stop()
-            when (this@FloatingControls.panelSize) {
-                GlobalProperties.FloatingControlsSizeProperty.LARGE -> { this@FloatingControls.stopButton!!.setImageDrawable(ResourcesCompat.getDrawable(this@FloatingControls.resources, R.drawable.icon_stop_continue_color_action_big, this@FloatingControls.theme)) }
-                GlobalProperties.FloatingControlsSizeProperty.NORMAL -> { this@FloatingControls.stopButton!!.setImageDrawable(ResourcesCompat.getDrawable(this@FloatingControls.resources, R.drawable.icon_stop_continue_color_action_normal, this@FloatingControls.theme)) }
-                GlobalProperties.FloatingControlsSizeProperty.SMALL -> { this@FloatingControls.stopButton!!.setImageDrawable(ResourcesCompat.getDrawable(this@FloatingControls.resources, R.drawable.icon_stop_continue_color_action_small, this@FloatingControls.theme)) }
-                GlobalProperties.FloatingControlsSizeProperty.TINY -> { this@FloatingControls.stopButton!!.setImageDrawable(ResourcesCompat.getDrawable(this@FloatingControls.resources, R.drawable.icon_stop_continue_color_action_tiny, this@FloatingControls.theme)) }
-                else -> {}
-            }
             this@FloatingControls.setControlState(true)
         }
 
         fun setResume(timeStarted: Long) {
             this@FloatingControls.recordingProgress?.setBase(timeStarted)
             this@FloatingControls.recordingProgress?.start()
-            when (this@FloatingControls.panelSize) {
-                GlobalProperties.FloatingControlsSizeProperty.LARGE -> { this@FloatingControls.stopButton!!.setImageDrawable(ResourcesCompat.getDrawable(this@FloatingControls.resources, R.drawable.icon_stop_color_action_big, this@FloatingControls.theme)) }
-                GlobalProperties.FloatingControlsSizeProperty.NORMAL -> { this@FloatingControls.stopButton!!.setImageDrawable(ResourcesCompat.getDrawable(this@FloatingControls.resources, R.drawable.icon_stop_color_action_normal, this@FloatingControls.theme)) }
-                GlobalProperties.FloatingControlsSizeProperty.SMALL -> { this@FloatingControls.stopButton!!.setImageDrawable(ResourcesCompat.getDrawable(this@FloatingControls.resources, R.drawable.icon_stop_color_action_small, this@FloatingControls.theme)) }
-                GlobalProperties.FloatingControlsSizeProperty.TINY -> { this@FloatingControls.stopButton!!.setImageDrawable(ResourcesCompat.getDrawable(this@FloatingControls.resources, R.drawable.icon_stop_color_action_tiny, this@FloatingControls.theme)) }
-                else -> {}
-            }
             this@FloatingControls.setControlState(false)
         }
 
@@ -230,7 +212,6 @@ class FloatingControls : Service() {
 
         fun setStop() {
             if (this@FloatingControls.isHorizontal) {
-
                 when (this@FloatingControls.panelSize) {
                     GlobalProperties.FloatingControlsSizeProperty.LARGE -> {
                         this@FloatingControls.appSettings?.setIntProperty(GlobalProperties.PropertiesInt.PANEL_POSITION_HORIZONTAL_X_BIG, this@FloatingControls.floatWindowLayoutParam!!.x)
@@ -318,9 +299,8 @@ class FloatingControls : Service() {
 
                     else -> {}
                 }
-
-                this@FloatingControls.closePanel()
             }
+            this@FloatingControls.closePanel()
         }
     }
 
@@ -402,8 +382,8 @@ class FloatingControls : Service() {
             this@FloatingControls.stopButton?.visibility = View.GONE
             this@FloatingControls.pauseButton?.visibility = View.GONE
             this@FloatingControls.resumeButton?.visibility = View.GONE
-            this@FloatingControls.viewHandle?.visibility = View.GONE
             this@FloatingControls.recordingProgress?.visibility = View.GONE
+            panelWrapped!!.visibility = View.GONE
             this@FloatingControls.panelWidth = this@FloatingControls.panelWeightHidden
             if (this@FloatingControls.isHorizontal) {
                 newX += (this@FloatingControls.panelWidthNormal / 2) - (this@FloatingControls.panelWeightHidden / 2)
@@ -418,6 +398,7 @@ class FloatingControls : Service() {
             setControlState(this@FloatingControls.recordingPaused)
             this@FloatingControls.recordingProgress?.visibility = View.VISIBLE
             this@FloatingControls.viewHandle?.visibility = View.VISIBLE
+            panelWrapped!!.visibility = View.VISIBLE
             this@FloatingControls.panelWidth = this@FloatingControls.panelWidthNormal
             if (this@FloatingControls.isHorizontal) {
                 newX -= (this@FloatingControls.panelWidthNormal / 2) - (this@FloatingControls.panelWeightHidden / 2)
@@ -466,54 +447,25 @@ class FloatingControls : Service() {
             }
         }
 
-        val darkTheme: GlobalProperties.DarkThemeProperty = this@FloatingControls.appSettings!!.getDarkTheme(true)
-
-        if (((this.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES && darkTheme == GlobalProperties.DarkThemeProperty.AUTOMATIC) || darkTheme == GlobalProperties.DarkThemeProperty.DARK) {
-            this@FloatingControls.baseContext.setTheme(R.style.Theme_CaptureCap_Dark)
-        } else {
-            this@FloatingControls.baseContext.setTheme(R.style.Theme_CaptureCap_Light)
-        }
+        this@FloatingControls.baseContext.setTheme(R.style.Theme_CaptureCap)
 
         if (this@FloatingControls.isHorizontal) {
-
-            if (((this.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES && darkTheme == GlobalProperties.DarkThemeProperty.AUTOMATIC) || darkTheme == GlobalProperties.DarkThemeProperty.DARK) {
-                when (this@FloatingControls.panelSize) {
-                    GlobalProperties.FloatingControlsSizeProperty.LARGE -> { this@FloatingControls.floatingPanel = (View.inflate(baseContext, R.layout.panel_float_big_dark, null) as ViewGroup) }
-                    GlobalProperties.FloatingControlsSizeProperty.NORMAL -> { this@FloatingControls.floatingPanel = (View.inflate(baseContext, R.layout.panel_float_normal_dark, null) as ViewGroup) }
-                    GlobalProperties.FloatingControlsSizeProperty.SMALL -> { this@FloatingControls.floatingPanel = (View.inflate(baseContext, R.layout.panel_float_small_dark, null) as ViewGroup) }
-                    GlobalProperties.FloatingControlsSizeProperty.TINY -> { this@FloatingControls.floatingPanel = (View.inflate(baseContext, R.layout.panel_float_tiny_dark, null) as ViewGroup) }
-                    GlobalProperties.FloatingControlsSizeProperty.LITTLE -> {}
-                    else -> {}
-                }
-            } else {
-                when (this@FloatingControls.panelSize) {
-                    GlobalProperties.FloatingControlsSizeProperty.LARGE -> { this@FloatingControls.floatingPanel = (View.inflate(baseContext, R.layout.panel_float_big, null) as ViewGroup) }
-                    GlobalProperties.FloatingControlsSizeProperty.NORMAL -> { this@FloatingControls.floatingPanel = (View.inflate(baseContext, R.layout.panel_float_normal, null) as ViewGroup) }
-                    GlobalProperties.FloatingControlsSizeProperty.SMALL -> { this@FloatingControls.floatingPanel = (View.inflate(baseContext, R.layout.panel_float_small, null) as ViewGroup) }
-                    GlobalProperties.FloatingControlsSizeProperty.TINY -> { this@FloatingControls.floatingPanel = (View.inflate(baseContext, R.layout.panel_float_tiny, null) as ViewGroup) }
-                    GlobalProperties.FloatingControlsSizeProperty.LITTLE -> {}
-                    else -> {}
-                }
+            when (this@FloatingControls.panelSize) {
+                GlobalProperties.FloatingControlsSizeProperty.LARGE -> { this@FloatingControls.floatingPanel = (View.inflate(baseContext, R.layout.panel_float_horizontal_big, null) as ViewGroup) }
+                GlobalProperties.FloatingControlsSizeProperty.NORMAL -> { this@FloatingControls.floatingPanel = (View.inflate(baseContext, R.layout.panel_float_horizontal_normal, null) as ViewGroup) }
+                GlobalProperties.FloatingControlsSizeProperty.SMALL -> { this@FloatingControls.floatingPanel = (View.inflate(baseContext, R.layout.panel_float_horizontal_small, null) as ViewGroup) }
+                GlobalProperties.FloatingControlsSizeProperty.TINY -> { this@FloatingControls.floatingPanel = (View.inflate(baseContext, R.layout.panel_float_horizontal_tiny, null) as ViewGroup) }
+                GlobalProperties.FloatingControlsSizeProperty.LITTLE -> {}
+                else -> {}
             }
         } else {
-            if (((this.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES && darkTheme == GlobalProperties.DarkThemeProperty.AUTOMATIC) || darkTheme == GlobalProperties.DarkThemeProperty.DARK) {
-                when (this@FloatingControls.panelSize) {
-                    GlobalProperties.FloatingControlsSizeProperty.LARGE -> { this@FloatingControls.floatingPanel = View.inflate(baseContext, R.layout.panel_float_vertical_big_dark, null) as ViewGroup }
-                    GlobalProperties.FloatingControlsSizeProperty.NORMAL -> { this@FloatingControls.floatingPanel = View.inflate(baseContext, R.layout.panel_float_vertical_normal_dark, null) as ViewGroup }
-                    GlobalProperties.FloatingControlsSizeProperty.SMALL -> { this@FloatingControls.floatingPanel = View.inflate(baseContext, R.layout.panel_float_vertical_small_dark, null) as ViewGroup }
-                    GlobalProperties.FloatingControlsSizeProperty.TINY -> { this@FloatingControls.floatingPanel = View.inflate(baseContext, R.layout.panel_float_vertical_tiny_dark, null) as ViewGroup }
-                    GlobalProperties.FloatingControlsSizeProperty.LITTLE -> {}
-                    else -> {}
-                }
-            } else {
-                when (this@FloatingControls.panelSize) {
-                    GlobalProperties.FloatingControlsSizeProperty.LARGE -> { this@FloatingControls.floatingPanel = View.inflate(baseContext, R.layout.panel_float_vertical_big, null) as ViewGroup }
-                    GlobalProperties.FloatingControlsSizeProperty.NORMAL -> { this@FloatingControls.floatingPanel = View.inflate(baseContext, R.layout.panel_float_vertical_normal, null) as ViewGroup }
-                    GlobalProperties.FloatingControlsSizeProperty.SMALL -> { this@FloatingControls.floatingPanel = View.inflate(baseContext, R.layout.panel_float_vertical_small, null) as ViewGroup }
-                    GlobalProperties.FloatingControlsSizeProperty.TINY -> { this@FloatingControls.floatingPanel = View.inflate(baseContext, R.layout.panel_float_vertical_tiny, null) as ViewGroup }
-                    GlobalProperties.FloatingControlsSizeProperty.LITTLE -> {}
-                    else -> {}
-                }
+            when (this@FloatingControls.panelSize) {
+                GlobalProperties.FloatingControlsSizeProperty.LARGE -> { this@FloatingControls.floatingPanel = View.inflate(baseContext, R.layout.panel_float_vertical_big, null) as ViewGroup }
+                GlobalProperties.FloatingControlsSizeProperty.NORMAL -> { this@FloatingControls.floatingPanel = View.inflate(baseContext, R.layout.panel_float_vertical_normal, null) as ViewGroup }
+                GlobalProperties.FloatingControlsSizeProperty.SMALL -> { this@FloatingControls.floatingPanel = View.inflate(baseContext, R.layout.panel_float_vertical_small, null) as ViewGroup }
+                GlobalProperties.FloatingControlsSizeProperty.TINY -> { this@FloatingControls.floatingPanel = View.inflate(baseContext, R.layout.panel_float_vertical_tiny, null) as ViewGroup }
+                GlobalProperties.FloatingControlsSizeProperty.LITTLE -> {}
+                else -> {}
             }
         }
 
@@ -521,24 +473,14 @@ class FloatingControls : Service() {
         this@FloatingControls.viewHandle = this@FloatingControls.floatingPanel!!.findViewById(R.id.floatingpanelhandle)
         val linearLayout: LinearLayout = this@FloatingControls.floatingPanel!!.findViewById(R.id.panelwithbackground)
 
-        if (((resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES && darkTheme == GlobalProperties.DarkThemeProperty.AUTOMATIC) || darkTheme == GlobalProperties.DarkThemeProperty.DARK) {
-            linearLayout.background = ResourcesCompat.getDrawable(resources, R.drawable.floatingpanel_shape_dark, theme)
-            this@FloatingControls.viewHandle?.setImageResource(R.drawable.floatingpanel_shape_dark)
-        }
-
         linearLayout.setAlpha((this@FloatingControls.appSettings!!.getIntProperty(GlobalProperties.PropertiesInt.FLOATING_CONTROLS_OPACITY, 9) + 1) * 0.1f)
         linearLayout.measure(0, 0)
         this@FloatingControls.panelWidthNormal = linearLayout.measuredWidth
         this@FloatingControls.panelHeight = linearLayout.measuredHeight
 
-        when (this@FloatingControls.panelSize) {
-           GlobalProperties.FloatingControlsSizeProperty.LARGE -> { this@FloatingControls.panelWeightHidden = ((this@FloatingControls.densityNormal * 50.0f) + 0.5f).toInt() }
-           GlobalProperties.FloatingControlsSizeProperty.NORMAL -> { this@FloatingControls.panelWeightHidden = ((this@FloatingControls.densityNormal * 40.0f) + 0.5f).toInt() }
-           GlobalProperties.FloatingControlsSizeProperty.SMALL -> { this@FloatingControls.panelWeightHidden = ((this@FloatingControls.densityNormal * 30.0f) + 0.5f).toInt() }
-           GlobalProperties.FloatingControlsSizeProperty.TINY -> { this@FloatingControls.panelWeightHidden = ((this@FloatingControls.densityNormal * 20.0f) + 0.5f).toInt() }
-           GlobalProperties.FloatingControlsSizeProperty.LITTLE -> {}
-            else -> {}
-        }
+        viewHandle!!.measure(0, 0)
+
+        this@FloatingControls.panelWeightHidden = viewHandle!!.measuredHeight
 
         if (this@FloatingControls.panelHidden) {
             this@FloatingControls.panelWidth = this@FloatingControls.panelWeightHidden
@@ -609,17 +551,18 @@ class FloatingControls : Service() {
         this@FloatingControls.resumeButton = this@FloatingControls.floatingPanel!!.findViewById(R.id.recordresumebuttonfloating)
         this@FloatingControls.recordingProgress = this@FloatingControls.floatingPanel!!.findViewById(R.id.timerrecordfloating)
         this@FloatingControls.resumeButton?.visibility = View.GONE
+        panelWrapped = floatingPanel!!.findViewById<LinearLayout>(R.id.panelwrapped)
         if (this@FloatingControls.panelHidden) {
+            panelWrapped!!.visibility = View.GONE
             this@FloatingControls.stopButton?.visibility = View.GONE
             this@FloatingControls.pauseButton?.visibility = View.GONE
             this@FloatingControls.resumeButton?.visibility = View.GONE
-            this@FloatingControls.viewHandle?.visibility = View.GONE
             this@FloatingControls.recordingProgress?.visibility = View.GONE
         } else {
+            panelWrapped!!.visibility = View.VISIBLE
             this@FloatingControls.stopButton?.visibility = View.VISIBLE
             setControlState(this@FloatingControls.recordingPaused)
             this@FloatingControls.recordingProgress?.visibility = View.VISIBLE
-            this@FloatingControls.viewHandle?.visibility = View.VISIBLE
         }
         if (this@FloatingControls.startAction == ACTION_RECORD_PANEL) {
             this@FloatingControls.stopButton?.setOnClickListener {

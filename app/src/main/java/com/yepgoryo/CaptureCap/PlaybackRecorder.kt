@@ -564,11 +564,11 @@ class PlaybackRecorder(private var context: Context,
 
     private fun startVideoStallTimer() {
         pollHandler?.removeCallbacks(pollRunnable!!)
+        pollHandler = Handler(mWorker!!.looper)
         checkStallAndRefeed()
     }
 
     private fun checkStallAndRefeed() {
-        pollHandler = Handler(mWorker!!.looper)
         pollRunnable = object : Runnable {
             override fun run() {
                 if (!mIsRunning.get() || mMuxerStarted || mVideoEncoder == null) {

@@ -128,11 +128,6 @@ class RecordingCropScreen : AppCompatActivity() {
             appSettings.setDarkTheme(true, darkTheme)
         }
 
-        if (((getResources().configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES && darkTheme == GlobalProperties.DarkThemeProperty.AUTOMATIC) || darkTheme == GlobalProperties.DarkThemeProperty.DARK) {
-            setTheme(R.style.Theme_CaptureCap_Dark)
-        } else {
-            setTheme(R.style.Theme_CaptureCap_Light)
-        }
         super.onCreate(savedInstanceState)
 
         setContentView(R.layout.video_crop_screen)
@@ -157,39 +152,11 @@ class RecordingCropScreen : AppCompatActivity() {
             WindowInsetsCompat.CONSUMED
         }
 
-        val darkTheme2: GlobalProperties.DarkThemeProperty = appSettings!!.getDarkTheme(true)
-        var zoomInIcon: VectorDrawableCompat
-        var zoomOutIcon: VectorDrawableCompat
-        var playIcon: VectorDrawableCompat
-        var pauseIcon: VectorDrawableCompat
-        var stopIcon: VectorDrawableCompat
-        var selectionIcon: VectorDrawableCompat
-
-        if (((getResources().configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES && darkTheme == GlobalProperties.DarkThemeProperty.AUTOMATIC) || darkTheme2 == GlobalProperties.DarkThemeProperty.DARK) {
-            zoomInIcon = VectorDrawableCompat.create(getResources(), R.drawable.icon_crop_zoom_in, null)!!
-            zoomOutIcon = VectorDrawableCompat.create(getResources(), R.drawable.icon_crop_zoom_out, null)!!
-            playIcon = VectorDrawableCompat.create(getResources(), R.drawable.icon_crop_play, null)!!
-            pauseIcon = VectorDrawableCompat.create(getResources(), R.drawable.icon_crop_pause, null)!!
-            stopIcon = VectorDrawableCompat.create(getResources(), R.drawable.icon_crop_stop, null)!!
-            selectionIcon = VectorDrawableCompat.create(getResources(), R.drawable.icon_crop_selection, null)!!
-        } else {
-            zoomInIcon = VectorDrawableCompat.create(getResources(), R.drawable.icon_crop_zoom_in_color, null)!!
-            zoomOutIcon = VectorDrawableCompat.create(getResources(), R.drawable.icon_crop_zoom_out_color, null)!!
-            playIcon = VectorDrawableCompat.create(getResources(), R.drawable.icon_crop_play_color, null)!!
-            pauseIcon = VectorDrawableCompat.create(getResources(), R.drawable.icon_crop_pause_color, null)!!
-            stopIcon = VectorDrawableCompat.create(getResources(), R.drawable.icon_crop_stop_color, null)!!
-            selectionIcon = VectorDrawableCompat.create(getResources(), R.drawable.icon_crop_selection_color, null)!!
-        }
-
         cropBar = findViewById(R.id.zoomableSeekbar)
 
         zoomInBtn = findViewById(R.id.zoomInBtn)
         zoomOutBtn = findViewById(R.id.zoomOutBtn)
         zoomScrollToSelection = findViewById(R.id.zoomScrollSelection)
-
-        zoomInBtn?.setImageDrawable(zoomInIcon)
-        zoomOutBtn?.setImageDrawable(zoomOutIcon)
-        zoomScrollToSelection?.setImageDrawable(selectionIcon)
 
         zoomInBtn?.setOnClickListener { cropBar.zoomIn() }
         zoomOutBtn?.setOnClickListener { cropBar.zoomOut() }
@@ -221,10 +188,6 @@ class RecordingCropScreen : AppCompatActivity() {
             playerView.setLayoutParams(layoutParams)
             recordPanel.orientation = LinearLayout.VERTICAL
         }
-
-        btnPlay.setImageDrawable(playIcon)
-        btnPause.setImageDrawable(pauseIcon)
-        btnStop.setImageDrawable(stopIcon)
 
         btnPlay.let { TooltipCompat.setTooltipText(it, getResources().getString(R.string.crop_play)) }
         btnPause.let { TooltipCompat.setTooltipText(it, getResources().getString(R.string.crop_pause)) }

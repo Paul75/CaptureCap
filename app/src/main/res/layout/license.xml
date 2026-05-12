@@ -7,7 +7,7 @@
 
     <LinearLayout
         android:id="@+id/statusbar"
-        android:background="@color/statusbar"
+        android:background="?attr/statusBar"
         android:layout_width="match_parent"
         android:layout_height="1px"
         android:gravity="center_horizontal"
@@ -19,7 +19,7 @@
         android:layout_height="match_parent"
         android:fillViewport="true"
         android:gravity="center">
-    
+
         <TextView
             android:id="@+id/licensetext"
             android:layout_width="wrap_content"

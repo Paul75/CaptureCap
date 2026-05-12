@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="ThemeAttributes">
+        <attr name="cropBarText" format="color" />
+        <attr name="cropBarTrack" format="color" />
+        <attr name="cropBarTrackSelected" format="color" />
+        <attr name="cropBarThumb" format="color" />
+        <attr name="cropBarThumbDragging" format="color" />
+        <attr name="cropBarThumbBorder" format="color" />
+        <attr name="cropBarTick" format="color" />
+        <attr name="cropBarCursor" format="color" />
+
+        <attr name="statusBar" format="color" />
+    </declare-styleable>
+</resources>

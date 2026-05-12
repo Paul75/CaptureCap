@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="512"
+   height="512"
+   viewBox="0 0 135.46666 135.46667"
+   version="1.1"
+   id="svg5"
+   sodipodi:docname="icon_donate.svg"
+   inkscape:version="1.4.2 (f4327f4, 2025-05-13)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:dc="http://purl.org/dc/elements/1.1/">
+  <title
+     id="title1">CaptureCap donate icon</title>
+  <sodipodi:namedview
+     id="namedview7"
+     pagecolor="#000000"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:document-units="px"
+     showgrid="false"
+     units="px"
+     width="512px"
+     inkscape:zoom="1.3155765"
+     inkscape:cx="194.21144"
+     inkscape:cy="332.55383"
+     inkscape:window-width="1920"
+     inkscape:window-height="1001"
+     inkscape:window-x="-9"
+     inkscape:window-y="-9"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg5"
+     inkscape:lockguides="false"
+     showguides="true"
+     inkscape:showpageshadow="2"
+     inkscape:deskcolor="#d1d1d1">
+    <inkscape:grid
+       type="xygrid"
+       id="grid2352"
+       originx="0"
+       originy="0"
+       spacingy="1"
+       spacingx="1"
+       units="px"
+       visible="false" />
+  </sodipodi:namedview>
+  <defs
+     id="defs2">
+    <rect
+       x="139.86264"
+       y="180.90928"
+       width="411.98669"
+       height="308.97643"
+       id="rect4" />
+    <rect
+       x="85.893903"
+       y="137.58227"
+       width="469.75603"
+       height="342.81549"
+       id="rect3" />
+  </defs>
+  <metadata
+     id="metadata1">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:creator>
+          <cc:Agent>
+            <dc:title>Egor Olegovich Yakovlev</dc:title>
+          </cc:Agent>
+        </dc:creator>
+        <dc:title>CaptureCap donate icon</dc:title>
+        <cc:license
+           rdf:resource="http://creativecommons.org/publicdomain/zero/1.0/" />
+      </cc:Work>
+      <cc:License
+         rdf:about="http://creativecommons.org/publicdomain/zero/1.0/">
+        <cc:permits
+           rdf:resource="http://creativecommons.org/ns#Reproduction" />
+        <cc:permits
+           rdf:resource="http://creativecommons.org/ns#Distribution" />
+        <cc:permits
+           rdf:resource="http://creativecommons.org/ns#DerivativeWorks" />
+      </cc:License>
+    </rdf:RDF>
+  </metadata>
+  <g
+     id="g3"
+     transform="matrix(0.78600992,0,0,0.78600992,13.782905,14.494261)"
+     style="stroke-width:1.27225">
+    <path
+       style="fill:none;stroke:#ffffff;stroke-width:6.73231529;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
+       d="M 61.699856,118.53333 V 16.933333"
+       id="path1" />
+    <path
+       style="fill:none;stroke:#ffffff;stroke-width:6.73231529;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
+       d="M 75.576852,118.53333 V 16.933333"
+       id="path3" />
+  </g>
+  <path
+     d="m 79.20721,83.076054 q 0,-1.724397 -0.530584,-3.095073 -0.486368,-1.41489 -1.857044,-2.564489 -1.370675,-1.193814 -3.846734,-2.343413 -2.476058,-1.149598 -6.411223,-2.387628 -4.377318,-1.41489 -8.312482,-3.183504 -3.89095,-1.768613 -6.897592,-4.112026 -2.962428,-2.387628 -4.686826,-5.526916 -1.680182,-3.139289 -1.680182,-7.29553 0,-4.023595 1.768613,-7.29553 1.768613,-3.31615 4.952117,-5.659563 3.183504,-2.387628 7.516607,-3.669872 4.377318,-1.282245 9.594727,-1.282245 7.118669,0 12.424509,2.564489 5.305839,2.56449 8.224051,7.030238 2.962428,4.465749 2.962428,10.213742 H 79.251426 q 0,-2.829781 -1.193814,-4.952117 -1.149599,-2.166551 -3.537227,-3.404581 -2.343413,-1.238029 -5.924855,-1.238029 -3.448796,0 -5.747993,1.061168 -2.299197,1.016953 -3.448796,2.785566 -1.149598,1.724398 -1.149598,3.890949 0,1.635968 0.795876,2.962428 0.840091,1.32646 2.476058,2.476058 1.635967,1.149599 4.023595,2.166551 2.387628,1.016953 5.526917,1.98969 5.261625,1.591752 9.241005,3.581442 4.023595,1.98969 6.72073,4.465749 2.697135,2.476059 4.067811,5.615347 1.370675,3.139289 1.370675,7.118669 0,4.200456 -1.635967,7.516606 -1.635968,3.31615 -4.731041,5.615348 -3.095073,2.299197 -7.38396,3.493011 -4.288888,1.193811 -9.594728,1.193811 -4.775256,0 -9.417865,-1.238026 -4.64261,-1.282245 -8.445129,-3.846734 -3.758303,-2.56449 -6.013285,-6.54387 -2.254982,-3.97938 -2.254982,-9.417865 h 13.308815 q 0,3.006642 0.928522,5.084763 0.928522,2.07812 2.608705,3.360365 1.724398,1.282245 4.06781,1.857044 2.387628,0.574799 5.217409,0.574799 3.448796,0 5.659563,-0.972737 2.254982,-0.972737 3.31615,-2.697135 1.105383,-1.724398 1.105383,-3.89095 z"
+     id="text5"
+     style="font-weight:bold;font-size:90.553px;line-height:203.744px;font-family:Roboto;-inkscape-font-specification:'Roboto Bold';text-align:center;letter-spacing:0px;word-spacing:0px;text-anchor:middle;fill:#ffffff;stroke-width:9.43261;stroke-linecap:round;stroke-linejoin:round"
+     aria-label="S" />
+</svg>

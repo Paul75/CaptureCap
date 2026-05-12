@@ -47,17 +47,9 @@ class PanelPositionScreen : AppCompatActivity() {
     public override fun onCreate(bundle: Bundle?) {
         val globalProperties = GlobalProperties(baseContext)
         this.appSettings = globalProperties
-        val darkTheme: GlobalProperties.DarkThemeProperty = globalProperties.getDarkTheme(true)
-        if (((getResources().configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES && darkTheme == GlobalProperties.DarkThemeProperty.AUTOMATIC) || darkTheme == GlobalProperties.DarkThemeProperty.DARK) {
-            setTheme(R.style.Theme_CaptureCap_Dark_NoActionBar)
-        } else {
-            setTheme(R.style.Theme_CaptureCap_Light_NoActionBar)
-        }
+
         super.onCreate(bundle)
         setContentView(R.layout.panel_position)
-        if (((getResources().configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES && darkTheme == GlobalProperties.DarkThemeProperty.AUTOMATIC) || darkTheme == GlobalProperties.DarkThemeProperty.DARK) {
-            findViewById<LinearLayout>(R.id.statusbar).setBackgroundColor(getColor(R.color.statusbar_dark))
-        }
 
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.VANILLA_ICE_CREAM) {
             findViewById<LinearLayout>(R.id.statusbar).visibility = View.GONE

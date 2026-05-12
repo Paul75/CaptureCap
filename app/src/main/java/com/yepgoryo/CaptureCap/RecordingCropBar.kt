@@ -79,47 +79,40 @@ class RecordingCropBar : View {
 
     private val selectedTrackPaint = Paint().apply {
         style = Paint.Style.STROKE
-        color = resources.getColor(R.color.crop_selected_track_paint)
         strokeWidth = trackHeight * 1.5f
         strokeWidth = trackHeight
     }
 
     private val thumbDraggingPaint = Paint().apply {
         style = Paint.Style.FILL
-        color = resources.getColor(R.color.crop_thumb_dragging_paint)
         strokeCap = Paint.Cap.ROUND
         strokeWidth = 2f
     }
 
     private val thumbPaint = Paint().apply {
         style = Paint.Style.FILL
-        color = resources.getColor(R.color.crop_thumb_paint)
         strokeCap = Paint.Cap.ROUND
         strokeWidth = 2f
     }
 
     private val thumbBorderPaint = Paint().apply {
         style = Paint.Style.STROKE
-        color = resources.getColor(R.color.crop_thumb_border_paint)
         strokeWidth = 2f
     }
 
     private val tickPaint = Paint().apply {
         style = Paint.Style.STROKE
-        color = resources.getColor(R.color.crop_tick_paint)
         strokeWidth = 1f
     }
 
     private val textPaint = Paint().apply {
         style = Paint.Style.FILL
-        color = resources.getColor(R.color.crop_text)
         textSize = timestampTextSize * context.resources.displayMetrics.scaledDensity
         isFakeBoldText = true
     }
 
     private val cursorPaint = Paint().apply {
         style = Paint.Style.STROKE
-        color = resources.getColor(R.color.crop_cursor_paint)
         strokeWidth = 4f
     }
 
@@ -139,16 +132,33 @@ class RecordingCropBar : View {
         var globalProperties = GlobalProperties(context)
         val darkTheme: GlobalProperties.DarkThemeProperty = globalProperties.getDarkTheme(false)
 
-        if (((getResources().configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES && darkTheme == GlobalProperties.DarkThemeProperty.AUTOMATIC) || darkTheme == GlobalProperties.DarkThemeProperty.DARK) {
-            trackPaint.color = resources.getColor(R.color.crop_track_paint_dark)
-            selectedTrackPaint.color = resources.getColor(R.color.crop_selected_track_paint_dark)
-            thumbDraggingPaint.color = resources.getColor(R.color.crop_thumb_dragging_paint_dark)
-            thumbPaint.color = resources.getColor(R.color.crop_thumb_paint_dark)
-            thumbBorderPaint.color = resources.getColor(R.color.crop_thumb_border_paint_dark)
-            tickPaint.color = resources.getColor(R.color.crop_tick_paint_dark)
-            textPaint.color = resources.getColor(R.color.crop_text_dark)
-            cursorPaint.color = resources.getColor(R.color.crop_cursor_paint_dark)
-        }
+        val cropBarText = TypedValue()
+        val cropBarTrack = TypedValue()
+        val cropBarTrackSelected = TypedValue()
+        val cropBarThumb = TypedValue()
+        val cropBarThumbDragging = TypedValue()
+        val cropBarThumbBorder = TypedValue()
+        val cropBarTick = TypedValue()
+        val cropBarCursor = TypedValue()
+
+        val theme = context.getTheme()
+        theme.resolveAttribute(R.attr.cropBarText, cropBarText, true)
+        theme.resolveAttribute(R.attr.cropBarTrack, cropBarTrack, true)
+        theme.resolveAttribute(R.attr.cropBarTrackSelected, cropBarTrackSelected, true)
+        theme.resolveAttribute(R.attr.cropBarThumb, cropBarThumb, true)
+        theme.resolveAttribute(R.attr.cropBarThumbDragging, cropBarThumbDragging, true)
+        theme.resolveAttribute(R.attr.cropBarThumbBorder, cropBarThumbBorder, true)
+        theme.resolveAttribute(R.attr.cropBarTick, cropBarTick, true)
+        theme.resolveAttribute(R.attr.cropBarCursor, cropBarCursor, true)
+
+        trackPaint.color = cropBarTrack.data
+        selectedTrackPaint.color = cropBarTrackSelected.data
+        thumbDraggingPaint.color = cropBarThumbDragging.data
+        thumbPaint.color = cropBarThumb.data
+        thumbBorderPaint.color = cropBarThumbBorder.data
+        tickPaint.color = cropBarTick.data
+        textPaint.color = cropBarText.data
+        cursorPaint.color = cropBarCursor.data
 
         thumbSize = TypedValue.applyDimension(
             TypedValue.COMPLEX_UNIT_DIP,

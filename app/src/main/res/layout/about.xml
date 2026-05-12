@@ -7,7 +7,7 @@
 
     <LinearLayout
         android:id="@+id/statusbar"
-        android:background="@color/statusbar"
+        android:background="?attr/statusBar"
         android:layout_width="match_parent"
         android:layout_height="1px"
         android:gravity="center_horizontal"
@@ -20,7 +20,7 @@
         android:scrollbars="vertical|horizontal"
         android:fillViewport="true"
         android:gravity="center">
-    
+
         <LinearLayout
             android:id="@+id/mainlayout"
             android:layout_width="match_parent"
@@ -28,7 +28,7 @@
             android:orientation="vertical"
             android:gravity="center_horizontal"
             android:layout_centerHorizontal="true">
-    
+
             <LinearLayout
                 android:id="@+id/appdesc"
                 android:layout_width="match_parent"
@@ -36,35 +36,34 @@
                 android:padding="20dp"
                 android:orientation="horizontal"
                 android:gravity="center">
-    
+
                 <ImageView
                     android:id="@+id/appicon"
                     android:layout_width="128dp"
                     android:layout_height="128dp"
                     android:contentDescription="@string/record_start"
                     android:background="@drawable/ic_launcher" />
-    
+
                 <LinearLayout
                     android:id="@+id/appinfo"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:padding="20dp"
                     android:orientation="vertical">
-    
+
                     <TextView
                         android:id="@+id/appname"
                         android:layout_height="wrap_content"
                         android:layout_width="wrap_content"
-                        android:textSize="32sp"
-                        android:textColor="?android:attr/textColorPrimary"
+                        android:textSize="28sp"
                         android:text="@string/app_name" />
-    
+
                     <LinearLayout
                         android:id="@+id/appversionline"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:orientation="horizontal">
-    
+
                         <TextView
                             android:id="@+id/appversion"
                             android:layout_height="wrap_content"
@@ -73,7 +72,7 @@
                             android:textColor="?android:attr/textColorSecondary"
                             android:text="@string/info_version"
                             android:textStyle="bold" />
-    
+
                         <TextView
                             android:id="@+id/appversionnum"
                             android:layout_height="wrap_content"
@@ -81,13 +80,13 @@
                             android:paddingLeft="5dp"
                             android:textColor="?android:attr/textColorSecondary"
                             android:textSize="18sp" />
-    
+
                     </LinearLayout>
-    
+
                 </LinearLayout>
-    
+
             </LinearLayout>
-    
+
             <LinearLayout
                 android:id="@+id/repoboard"
                 android:layout_width="wrap_content"
@@ -106,16 +105,15 @@
                     android:orientation="vertical"
                     android:gravity="center_horizontal"
                     android:layout_centerHorizontal="true">
-        
+
                     <TextView
                         android:id="@+id/reposources"
                         android:layout_height="wrap_content"
                         android:layout_width="wrap_content"
                         android:textSize="18sp"
-                        android:textColor="?android:attr/textColorPrimary"
                         android:text="@string/info_sources"
                         android:textStyle="bold" />
-        
+
                     <TextView
                         android:id="@+id/repogithublink"
                         android:autoLink="web"
@@ -126,7 +124,7 @@
                         android:padding="10dp"
                         android:textSize="12sp"
                         android:text="@string/repo_github_link" />
-        
+
                 </LinearLayout>
 
                 <LinearLayout
@@ -142,12 +140,12 @@
                         android:id="@+id/showlicense"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:padding="20dp"
                         android:text="@string/info_license"
+                        android:drawableLeft="@drawable/icon_license"
                         android:contentDescription="@string/info_license"
-                        android:background="@drawable/button_background"
-                        android:textColor="?android:attr/textColorPrimary"
-                        android:textSize="16sp"
+                        android:textSize="12sp"
+                        android:paddingLeft="8dp"
+                        android:background="@drawable/bg_rounded_button"
                         android:layout_marginRight="16dp"
                         android:layout_centerHorizontal="true" />
 
@@ -155,16 +153,16 @@
                         android:id="@+id/donate"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:padding="20dp"
                         android:text="@string/info_donate"
+                        android:drawableLeft="@drawable/icon_donate"
                         android:contentDescription="@string/info_donate"
-                        android:background="@drawable/button_background"
-                        android:textColor="?android:attr/textColorPrimary"
-                        android:textSize="16sp"
+                        android:background="@drawable/bg_rounded_button"
+                        android:paddingLeft="8dp"
+                        android:textSize="12sp"
                         android:layout_centerHorizontal="true" />
 
                 </LinearLayout>
-    
+
             </LinearLayout>
 
             <TextView
@@ -172,7 +170,6 @@
                 android:layout_height="wrap_content"
                 android:layout_width="wrap_content"
                 android:textSize="32sp"
-                android:textColor="?android:attr/textColorPrimary"
                 android:paddingTop="40dp"
                 android:paddingLeft="10dp"
                 android:paddingRight="10dp"
@@ -180,11 +177,10 @@
                 android:text="@string/info_contributors"
                 android:textStyle="bold"
                 android:layout_centerHorizontal="true" />
-    
+
             <LinearLayout
                 android:id="@+id/contributorsboard"
-                android:background="@drawable/contributorspanel_shape"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:padding="10dp"
                 android:layout_marginBottom="40dp"
@@ -196,11 +192,11 @@
                     android:id="@+id/contributorslist"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content" />
-    
+
             </LinearLayout>
 
         </LinearLayout>
-    
+
     </androidx.core.widget.NestedScrollView>
 
 </LinearLayout>

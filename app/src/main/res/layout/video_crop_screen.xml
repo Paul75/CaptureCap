@@ -7,7 +7,7 @@
 
     <LinearLayout
         android:id="@+id/statusbar"
-        android:background="@color/statusbar"
+        android:background="?attr/statusBar"
         android:layout_width="match_parent"
         android:layout_height="1px"
         android:gravity="center_horizontal"
@@ -22,7 +22,7 @@
         android:paddingRight="16dp"
         android:fillViewport="true"
         android:gravity="center">
- 
+
         <LinearLayout
             android:id="@+id/crop_screen"
             android:gravity="center"
@@ -42,7 +42,7 @@
                 app:use_controller="false"
                 app:default_artwork="@drawable/icon_crop_audio_artwork"
                 app:use_artwork="true" />
-            
+
             <LinearLayout
                 android:id="@+id/controls"
                 android:layout_width="400dp"
@@ -54,40 +54,43 @@
                 android:layout_centerVertical="true"
                 android:layout_centerHorizontal="true"
                 android:gravity="center_horizontal">
- 
+
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
                     android:gravity="center">
-            
+
                     <ImageButton
                         android:id="@+id/btnPlay"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_margin="7dp"
                         android:contentDescription="@string/crop_play"
+                        android:src="@drawable/icon_crop_play"
                         android:background="?attr/selectableItemBackgroundBorderless"
                         android:layout_centerHorizontal="true" />
-        
+
                     <ImageButton
                         android:id="@+id/btnPause"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_margin="7dp"
                         android:contentDescription="@string/crop_pause"
+                        android:src="@drawable/icon_crop_pause"
                         android:background="?attr/selectableItemBackgroundBorderless"
                         android:layout_centerHorizontal="true" />
-        
+
                     <ImageButton
                         android:id="@+id/btnStop"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_margin="7dp"
                         android:contentDescription="@string/crop_stop"
+                        android:src="@drawable/icon_crop_stop"
                         android:background="?attr/selectableItemBackgroundBorderless"
                         android:layout_centerHorizontal="true" />
-        
+
                 </LinearLayout>
 
                 <TextView
@@ -99,68 +102,68 @@
                     android:textColor="?android:attr/textColorPrimary"
                     android:textStyle="bold"
                     android:textSize="14sp" />
-            
+
                 <com.yepgoryo.CaptureCap.RecordingCropBar
                     android:id="@+id/zoomableSeekbar"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="16dp" />
-            
+
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="16dp"
                     android:orientation="horizontal"
                     android:gravity="center">
-            
+
                     <ImageButton
                         android:id="@+id/zoomInBtn"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_margin="7dp"
                         android:contentDescription="@string/crop_zoom_in"
+                        android:src="@drawable/icon_crop_zoom_in"
                         android:background="?attr/selectableItemBackgroundBorderless"
                         android:layout_centerHorizontal="true" />
-        
+
                     <ImageButton
                         android:id="@+id/zoomScrollSelection"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_margin="7dp"
                         android:contentDescription="@string/crop_selection"
+                        android:src="@drawable/icon_crop_selection"
                         android:background="?attr/selectableItemBackgroundBorderless"
                         android:layout_centerHorizontal="true" />
-            
+
                     <ImageButton
                         android:id="@+id/zoomOutBtn"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_margin="7dp"
                         android:contentDescription="@string/crop_zoom_out"
+                        android:src="@drawable/icon_crop_zoom_out"
                         android:background="?attr/selectableItemBackgroundBorderless"
                         android:layout_centerHorizontal="true" />
-        
+
                 </LinearLayout>
-        
+
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="32dp"
                     android:orientation="horizontal"
                     android:gravity="center">
-        
+
                     <Button
                         android:id="@+id/cropVideo"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:paddingTop="10dp"
-                        android:paddingBottom="10dp"
-                        android:paddingLeft="20dp"
-                        android:paddingRight="20dp"
                         android:text="@string/crop_do_save"
                         android:contentDescription="@string/crop_do_save"
-                        android:background="@drawable/button_background"
-                        android:textColor="?android:attr/textColorPrimary"
+                        android:drawableLeft="@drawable/icon_record_crop"
+                        android:paddingLeft="8dp"
+                        android:background="@drawable/bg_rounded_button"
                         android:textSize="12sp"
                         android:layout_centerHorizontal="true" />
 

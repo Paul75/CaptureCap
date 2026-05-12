@@ -5,6 +5,11 @@
     <string name="record_stop">Stop recording</string>
     <string name="record_pause">Pause recording</string>
     <string name="record_resume">Continue recording</string>
+    <string name="record_open_title">Open</string>
+    <string name="record_share_title">Share</string>
+    <string name="record_delete_title">Delete</string>
+    <string name="record_crop_title">Crop</string>
+    <string name="record_back_title">Back to recording</string>
     <string name="record_open">Open recording</string>
     <string name="record_share">Share recording</string>
     <string name="record_delete">Delete recording</string>
@@ -43,6 +48,7 @@
     <string name="resolution_option">Choose custom video resolution</string>
     <string name="resolution_option_description">Set custom video resolution</string>
     <string name="resolution_option_auto">Native</string>
+    <string name="capture_start">Start capture</string>
     <string name="codec_option">Choose custom video codec</string>
     <string name="codec_option_description">Set custom video codec</string>
     <string name="codec_option_auto">Default</string>
@@ -133,6 +139,9 @@
     <string name="streaming_finished_text">Screen streaming finished</string>
     <string name="streaming_finished_saved_title">Streaming finished</string>
     <string name="streaming_finished_saved_text">Stream recording saved</string>
+    <string name="capture_stop">Stop</string>
+    <string name="capture_pause">Pause</string>
+    <string name="capture_resume">Resume</string>
     <string name="audio_playback_unavailable">Audio Playback recording requires Android 10 or later</string>
     <string name="notifications_channel">Recording notifications</string>
     <string name="notifications_stop">Stop</string>
@@ -152,6 +161,12 @@
     <string name="error_connecting_timed_out">Error: RTMP connection timed out</string>
     <string name="setting_video_recordings_folder">Video recordings folder</string>
     <string name="setting_audio_recordings_folder">Audio recordings folder</string>
+    <string name="setting_record_options">Capture options</string>
+    <string name="setting_record_option_record">Record</string>
+    <string name="setting_record_option_stream">Stream</string>
+    <string name="setting_record_option_screen">Screen</string>
+    <string name="setting_record_option_audio">Audio</string>
+    <string name="setting_record_option_microphone">Microphone</string>
     <string name="setting_record_screen">Record screen</string>
     <string name="setting_record_type_video">Video</string>
     <string name="setting_record_type_audio">Audio only</string>
