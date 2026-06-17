@@ -10,9 +10,7 @@ import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import android.hardware.display.DisplayManager
 import android.os.Binder
-import android.os.Handler
 import android.os.IBinder
-import android.os.Looper
 import android.os.SystemClock
 import android.util.DisplayMetrics
 import android.view.Display
@@ -32,9 +30,6 @@ class FloatingControls : Service() {
     companion object {
         const val ACTION_RECORD_PANEL = MainActivity.appName + ".PANEL_RECORD"
         const val ACTION_POSITION_PANEL = MainActivity.appName + ".PANEL_POSITION"
-        private const val AUTO_HIDE_DELAY_MS: Long = 4000L
-        private const val HANDLE_PADDING_DP = 16
-        private const val HANDLE_PADDING_SMALL_DP = 2
     }
 
     private var appSettings: GlobalProperties? = null
@@ -69,29 +64,8 @@ class FloatingControls : Service() {
     private var panelHidden = false
     private var isStopped = true
     private var isRestarting = false
-    private var savedPanelX: Int = 0
-    private var savedPanelY: Int = 0
-
-    private var autoHideHandler: Handler = Handler(Looper.getMainLooper())
-    private val autoHideRunnable: Runnable = Runnable {
-        if (!this@FloatingControls.panelHidden) {
-            this@FloatingControls.togglePanel()
-        }
-    }
-
-    private fun scheduleAutoHide() {
-        this.autoHideHandler.removeCallbacks(this.autoHideRunnable)
-        if (!this.panelHidden && this.startAction == ACTION_RECORD_PANEL) {
-            this.autoHideHandler.postDelayed(this.autoHideRunnable, AUTO_HIDE_DELAY_MS)
-        }
-    }
-
-    private fun cancelAutoHide() {
-        this.autoHideHandler.removeCallbacks(this.autoHideRunnable)
-    }
 
     fun closePanel() {
-        cancelAutoHide()
         if (this.floatingPanel != null) {
             this.windowManager?.removeView(this.floatingPanel)
             floatingPanel = null
@@ -405,17 +379,11 @@ class FloatingControls : Service() {
 
         if (!this@FloatingControls.panelHidden) {
             this@FloatingControls.panelHidden = true
-            this@FloatingControls.savedPanelX = this@FloatingControls.floatWindowLayoutParam!!.x
-            this@FloatingControls.savedPanelY = this@FloatingControls.floatWindowLayoutParam!!.y
             this@FloatingControls.stopButton?.visibility = View.GONE
             this@FloatingControls.pauseButton?.visibility = View.GONE
             this@FloatingControls.resumeButton?.visibility = View.GONE
             this@FloatingControls.recordingProgress?.visibility = View.GONE
             panelWrapped!!.visibility = View.GONE
-            val smallPad = (HANDLE_PADDING_SMALL_DP * this@FloatingControls.densityNormal).toInt()
-            this@FloatingControls.viewHandle?.setPadding(smallPad, smallPad, smallPad, smallPad)
-            this@FloatingControls.viewHandle?.measure(0, 0)
-            this@FloatingControls.panelWeightHidden = this@FloatingControls.viewHandle!!.measuredHeight
             this@FloatingControls.panelWidth = this@FloatingControls.panelWeightHidden
             if (this@FloatingControls.isHorizontal) {
                 newX += (this@FloatingControls.panelWidthNormal / 2) - (this@FloatingControls.panelWeightHidden / 2)
@@ -431,28 +399,18 @@ class FloatingControls : Service() {
             this@FloatingControls.recordingProgress?.visibility = View.VISIBLE
             this@FloatingControls.viewHandle?.visibility = View.VISIBLE
             panelWrapped!!.visibility = View.VISIBLE
-            val origPad = (HANDLE_PADDING_DP * this@FloatingControls.densityNormal).toInt()
-            this@FloatingControls.viewHandle?.setPadding(origPad, origPad, origPad, origPad)
             this@FloatingControls.panelWidth = this@FloatingControls.panelWidthNormal
-            newX = this@FloatingControls.savedPanelX
-            newY = this@FloatingControls.savedPanelY
             if (this@FloatingControls.isHorizontal) {
+                newX -= (this@FloatingControls.panelWidthNormal / 2) - (this@FloatingControls.panelWeightHidden / 2)
                 this@FloatingControls.floatWindowLayoutParam!!.width = this@FloatingControls.panelWidthNormal
             } else {
+                newY -= (this@FloatingControls.panelHeight / 2) - (this@FloatingControls.panelWeightHidden / 2)
                 this@FloatingControls.floatWindowLayoutParam!!.height = this@FloatingControls.panelHeight
             }
         }
 
         this@FloatingControls.floatWindowLayoutParam!!.x = newX
         this@FloatingControls.floatWindowLayoutParam!!.y = newY
-
-        this@FloatingControls.windowManager?.updateViewLayout(this@FloatingControls.floatingPanel, this@FloatingControls.floatWindowLayoutParam)
-
-        if (this@FloatingControls.panelHidden) {
-            this@FloatingControls.cancelAutoHide()
-        } else {
-            this@FloatingControls.scheduleAutoHide()
-        }
     }
 
     fun startRecord() {
@@ -587,10 +545,6 @@ class FloatingControls : Service() {
             }
         }
         checkBoundaries()
-        if (this@FloatingControls.panelHidden) {
-            this@FloatingControls.savedPanelX = this@FloatingControls.floatWindowLayoutParam!!.x
-            this@FloatingControls.savedPanelY = this@FloatingControls.floatWindowLayoutParam!!.y
-        }
         this@FloatingControls.windowManager?.addView(this@FloatingControls.floatingPanel, this@FloatingControls.floatWindowLayoutParam)
         this@FloatingControls.pauseButton = this@FloatingControls.floatingPanel!!.findViewById(R.id.recordpausebuttonfloating)
         this@FloatingControls.stopButton = this@FloatingControls.floatingPanel!!.findViewById(R.id.recordstopbuttonfloating)
@@ -633,10 +587,6 @@ class FloatingControls : Service() {
                 this@FloatingControls.recordingProgress?.setBase(this@FloatingControls.timerStart)
             }
             this@FloatingControls.recordingProgress?.start()
-        }
-
-        if (!this@FloatingControls.panelHidden) {
-            this@FloatingControls.scheduleAutoHide()
         }
 
         this.floatingPanel?.setOnTouchListener(object : View.OnTouchListener {
