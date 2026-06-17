@@ -418,10 +418,10 @@ class FloatingControls : Service() {
             this@FloatingControls.panelWeightHidden = this@FloatingControls.viewHandle!!.measuredHeight
             this@FloatingControls.panelWidth = this@FloatingControls.panelWeightHidden
             if (this@FloatingControls.isHorizontal) {
-                newX = (this@FloatingControls.displayWidth / 2) - (this@FloatingControls.panelWeightHidden / 2)
+                newX += (this@FloatingControls.panelWidthNormal / 2) - (this@FloatingControls.panelWeightHidden / 2)
                 this@FloatingControls.floatWindowLayoutParam!!.width = this@FloatingControls.panelWeightHidden
             } else {
-                newY = (this@FloatingControls.displayHeight / 2) - (this@FloatingControls.panelWeightHidden / 2)
+                newY += (this@FloatingControls.panelHeight / 2) - (this@FloatingControls.panelWeightHidden / 2)
                 this@FloatingControls.floatWindowLayoutParam!!.height = this@FloatingControls.panelWeightHidden
             }
         } else {
@@ -587,6 +587,10 @@ class FloatingControls : Service() {
             }
         }
         checkBoundaries()
+        if (this@FloatingControls.panelHidden) {
+            this@FloatingControls.savedPanelX = this@FloatingControls.floatWindowLayoutParam!!.x
+            this@FloatingControls.savedPanelY = this@FloatingControls.floatWindowLayoutParam!!.y
+        }
         this@FloatingControls.windowManager?.addView(this@FloatingControls.floatingPanel, this@FloatingControls.floatWindowLayoutParam)
         this@FloatingControls.pauseButton = this@FloatingControls.floatingPanel!!.findViewById(R.id.recordpausebuttonfloating)
         this@FloatingControls.stopButton = this@FloatingControls.floatingPanel!!.findViewById(R.id.recordstopbuttonfloating)
